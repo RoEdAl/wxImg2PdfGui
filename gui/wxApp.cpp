@@ -11,7 +11,7 @@
  // ===============================================================================
 
 const char wxMyApp::APP_NAME[] = "img2pdf-frontend";
-const char wxMyApp::APP_VERSION[] = WXMATROSKA_VERSION_STR;
+const char wxMyApp::APP_VERSION[] = PROJECT_VERSION_STR;
 const char wxMyApp::APP_VENDOR_NAME[] = "Edmunt Pienkowsky";
 const char wxMyApp::APP_AUTHOR[] = "Edmunt Pienkowsky - roed@onet.eu";
 const char wxMyApp::LICENSE_FILE_NAME[] = "license.txt";
