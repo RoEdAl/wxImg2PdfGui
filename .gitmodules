@@ -1,0 +1,9 @@
+[submodule "wxCmdTools"]
+	path = wxCmdTools
+	url = https://github.com/RoEdAl/wxCmdTools.git
+[submodule "wxEncodingDetection"]
+	path = wxEncodingDetection
+	url = https://github.com/RoEdAl/wxEncodingDetection.git
+[submodule "js"]
+	path = js
+	url = https://github.com/RoEdAl/mu-img2pdf

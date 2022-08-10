@@ -1,0 +1,65 @@
+/*
+	Img2PdfGui.rc
+*/
+
+#include <windows.h>
+LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
+
+#include <app_config.h>
+
+/*
+	Icon
+
+	Icon with lowest ID value placed first to ensure application icon
+	remains consistent on all systems.
+*/
+ico_main                      ICON                    "../gui/icons/cd_mka.ico"
+
+/*
+ico_cue_file                  ICON                    "../gui/icons/cue_file.ico"
+ico_file_add                  ICON                    "../gui/icons/cue_file_add.ico"
+ico_cue_file_remove           ICON                    "../gui/icons/cue_file_remove.ico"
+ico_file_mask                 ICON                    "../gui/icons/file_mask.ico"
+ico_folder                    ICON                    "../gui/icons/folder.ico"
+ico_media_file                ICON                    "../gui/icons/media_file.ico"
+ico_media_file_add            ICON                    "../gui/icons/media_file_add.ico"
+*/
+
+/*
+	Version
+*/
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION WXMATROSKA_VERSION_MAJOR, WXMATROSKA_VERSION_MINOR, WXMATROSKA_VERSION_PATCH, WXMATROSKA_VERSION_TWEAK
+ PRODUCTVERSION WXMATROSKA_VERSION_MAJOR, WXMATROSKA_VERSION_MINOR, WXMATROSKA_VERSION_PATCH, WXMATROSKA_VERSION_TWEAK
+ FILEFLAGSMASK 0x17L
+#ifdef NDEBUG
+ FILEFLAGS 0x0L
+#else
+ FILEFLAGS 0x1L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "Comments", "Frontend to mutool from MuPDF package"
+            VALUE "CompanyName", "Edmunt Pienkowsky - roed@onet.eu"
+            VALUE "FileDescription", "Image to PDF coverter without re-encoding [GUI]"
+            VALUE "FileVersion", WXMATROSKA_VERSION_STR4
+            VALUE "InternalName", "wxImg2PdfGui"
+            VALUE "LegalCopyright", "Simplified BSD License - http://www.opensource.org/licenses/bsd-license.html"
+            VALUE "OriginalFilename", "img2pdf-frontend.exe"
+            VALUE "ProductName", "img2pdf"
+            VALUE "ProductVersion", WXMATROSKA_VERSION_STR4
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END
+
+#include <wx/msw/wx-manifest.rc>

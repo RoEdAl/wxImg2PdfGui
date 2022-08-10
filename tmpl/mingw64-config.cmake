@@ -1,0 +1,7 @@
+#
+# wxWidgets configuration - MinGW64
+#
+SET(WXWIDGETS_VER_COMPACT @WX_VER_COMPACT@)
+SET(WXWIDGETS_DLL_SUFFIX @WX_MW64_DLL_SUFFIX@)
+INCLUDE(${wxWidgets_ROOT_DIR}/wx-widgets.cmake)
+SET(wxWidgets_USE_REL_AND_DBG OFF)
