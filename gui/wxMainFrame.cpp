@@ -290,6 +290,27 @@ namespace
             else return m_checkBox->GetValue();
         }
     };
+
+    class DropTarget:
+        public wxFileDropTarget
+    {
+        public:
+
+        DropTarget(wxMainFrame* pMainFrame): m_pMainFrame(pMainFrame)
+        {
+        }
+
+        virtual bool OnDropFiles(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), const wxArrayString& filenames)
+        {
+            wxBusyCursor busy;
+            m_pMainFrame->OnDropFiles(filenames);
+            return true;
+        }
+
+        private:
+
+        wxMainFrame* const m_pMainFrame;
+    };
 }
 
 wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& toolFont, const wxFont& toolFontEx, const wxSizerFlags& btnLeft, const wxSizerFlags& btnMiddle, const wxSizerFlags& btnMiddleExp, const wxSizerFlags& btnRight)
@@ -679,6 +700,8 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
     m_timerAutoScroll.Bind(wxEVT_TIMER, &wxMainFrame::OnAutoScrollTimer, this);
 
     Bind(wxEVT_THREAD, &wxMainFrame::OnItemUpdated, this);
+
+    SetDropTarget(new DropTarget(this));
 }
 
 void wxMainFrame::OnClose(wxCloseEvent& event)
@@ -1228,6 +1251,34 @@ void wxMainFrame::ExecuteMuTool(const wxArrayString& args, const wxFileName& cwd
     ExecuteCmd(mutool, options_to_str(args), cwd, temporaryFiles);
 }
 
+void wxMainFrame::OnDropFiles(const wxArrayString& fileNames)
+{
+    {
+        const wxThread* thread = GetThread();
+        if (thread != nullptr && thread->IsAlive())
+        {
+            wxLogWarning(_("Cannot drop files - background thread is still running"));
+            return;
+        }
+    }
+
+    wxWindowUpdateLocker locker(m_notebook);
+
+    m_notebook->ChangeSelection(0);
+    for (const auto& i : fileNames)
+    {
+        append_item(m_listViewInputFiles, wxFileName::FileName(i));
+    }
+
+    const wxThreadError threadRes = CreateThread();
+    if (threadRes == wxTHREAD_NO_ERROR)
+    {
+        GetThread()->Run();
+    }
+
+    post_focus_list();
+}
+
 void wxMainFrame::post_focus_list() const
 {
     wxVector<wxVariant> vempty;
@@ -1261,6 +1312,7 @@ void wxMainFrame::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
     dlgFile->GetFilenames(fileNames);
 
     {
+        wxBusyCursor busy;
         wxWindowUpdateLocker locker(m_listViewInputFiles);
 
         for(const auto& i : fileNames)

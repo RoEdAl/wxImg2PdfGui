@@ -119,4 +119,5 @@ class wxMainFrame:
     public:
 
     wxMainFrame(wxWindow* = nullptr, wxWindowID = wxID_ANY, const wxString& = _("img2pdf frontend"), const wxPoint& = wxDefaultPosition, const wxSize& = wxDefaultSize, long = wxDEFAULT_FRAME_STYLE | wxCLIP_SIBLINGS | wxTAB_TRAVERSAL);
+    void OnDropFiles(const wxArrayString&);
 };
