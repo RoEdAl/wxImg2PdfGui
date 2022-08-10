@@ -57,9 +57,9 @@ ENDIF()
 SET(URL_NINJA "http://github.com/ninja-build/ninja/releases/download/v1.11.0")
 DownloadPkgSha1(${URL_NINJA} ninja-win.zip 31c7b577d3e5be57eb8acca527f73a484ace7d8c "Ninja builder")
 
-SET(PANDOC_VERSION 2.18)
+SET(PANDOC_VERSION 2.19)
 SET(URL_PANDOC "http://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}")
-DownloadPkgSha1(${URL_PANDOC} pandoc-${PANDOC_VERSION}-windows-x86_64.zip 7db15a14081b52c851a42a5a69a6fd52958ab110 "Pandoc")
+DownloadPkgSha1(${URL_PANDOC} pandoc-${PANDOC_VERSION}-windows-x86_64.zip 7a581c2efd02252e7eaa830cc813f3147c01f691 Pandoc)
 
 # extracting
 
