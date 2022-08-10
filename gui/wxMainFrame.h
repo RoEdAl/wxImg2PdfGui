@@ -85,6 +85,7 @@ class wxMainFrame:
 
     void build_script(wxJson&, wxFileName&) const;
     void delete_temporary_files();
+    void post_focus_list() const;
     virtual wxThread::ExitCode Entry() wxOVERRIDE;
 
     void ExecuteMuTool(const wxArrayString&, const wxFileName&, const wxArrayFileName&);

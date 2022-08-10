@@ -266,39 +266,25 @@ namespace
 
         return load_icons(iconLocation, iconBundle);
     }
-}
 
-
-void wxMyApp::fill_icon_map()
-{
+    wxString dot_ext(const wxString& ext)
     {
+        wxString res(ext);
+        res.Prepend('.');
+        return res;
+    }
+
+    void add_icons_for_ext(const wxString& ext, std::unordered_map<wxString, wxIconBundle>& iconMap)
+    {
+        const wxString dotExt(dot_ext(ext));
         wxIconBundle icons;
 
-        if (get_file_type_icons(".jpg", icons))
+        if (get_file_type_icons(dotExt, icons))
         {
-            m_iconMap["jpg"] = icons;
+            iconMap[ext] = icons;
         }
     }
 
-    {
-        wxIconBundle icons;
-        if (get_file_type_icons(".png", icons))
-        {
-            m_iconMap["png"] = icons;
-        }
-    }
-
-    {
-        wxIconBundle icons;
-        if (get_file_type_icons(".pdf", icons))
-        {
-            m_iconMap["pdf"] = icons;
-        }
-    }
-}
-
-namespace
-{
     bool get_fn_ext(const wxFileName& fn, wxString& ext)
     {
         if (!fn.HasExt()) return false;
@@ -308,6 +294,14 @@ namespace
     }
 }
 
+void wxMyApp::fill_icon_map()
+{
+    add_icons_for_ext("jpg", m_iconMap);
+    add_icons_for_ext("jp2", m_iconMap);
+    add_icons_for_ext("png", m_iconMap);
+    add_icons_for_ext("pdf", m_iconMap);
+}
+
 bool wxMyApp::GetFnColumn(const wxFileName& fn, wxVector<wxVariant>& column) const
 {
     wxString ext;
@@ -315,8 +309,8 @@ bool wxMyApp::GetFnColumn(const wxFileName& fn, wxVector<wxVariant>& column) con
 
     try
     {
-        const bool isPdf = ext.CmpNoCase("pdf") == 0;
-        const wxSize elSize(isPdf ? 0 : -1, isPdf ? 0 : -1);
+        const bool undeterminabledSize = ext.CmpNoCase("pdf") == 0 || ext.CmpNoCase("jp2") == 0;
+        const wxSize elSize(undeterminabledSize ? 0 : -1, undeterminabledSize ? 0 : -1);
 
         column.push_back(wxVariant(wxBitmapBundle::FromIconBundle(m_iconMap.at(ext))));
         column.push_back(wxVariantDataFileName::Get(fn));

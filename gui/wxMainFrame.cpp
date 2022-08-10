@@ -608,7 +608,7 @@ wxBoxSizer* wxMainFrame::create_bottom_ctrls(const wxFont& toolFont, const wxSiz
         m_checkBoxVerbose->Bind(wxEVT_CHECKBOX, &wxMainFrame::OnCheckVerbose, this);
         innerSizer->Add(m_checkBoxVerbose);
 
-        m_checkBoxSwitchToMessagesPane = create_checkbox(this, _("Switch to Messages tab"), true);
+        m_checkBoxSwitchToMessagesPane = create_checkbox(this, _("Switch to Messages tab"));
         m_checkBoxSwitchToMessagesPane->SetFont(toolFont);
         m_checkBoxSwitchToMessagesPane->SetToolTip(_("Switch to Messages tab before execution"));
         innerSizer->Add(m_checkBoxSwitchToMessagesPane);
@@ -1147,13 +1147,13 @@ void wxMainFrame::build_script(wxJson& json, wxFileName& workingDirectory) const
         const wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
         wxDataViewItemArray elems;
         dataModel->GetChildren(wxDataViewItem(), elems);
-        for (wxDataViewItemArray::const_iterator i = elems.begin(), end = elems.end(); i != end; ++i)
+        for (const auto& i :elems)
         {
             wxVariant v;
-            dataModel->GetValue(v, *i, 1);
+            dataModel->GetValue(v, i, 1);
             if (v.GetType().CmpNoCase(wxS("wxFileName")) != 0) continue;
             const wxFileName& fn = get_variant_custom_val<wxVariantDataFileName>(v);
-            const wxString ext = fn.GetExt();
+            const wxString ext = fn.GetExt().MakeLower();
             if (ext.CmpNoCase("pdf") == 0)
             {
                 wxJson pdf;
@@ -1166,7 +1166,7 @@ void wxMainFrame::build_script(wxJson& json, wxFileName& workingDirectory) const
                 doc["doc"] = fn.GetFullPath().utf8_string();
                 src.push_back(doc);
             }
-            else
+            else // image file
             {
                 src.push_back(fn.GetFullPath().utf8_string());
             }
@@ -1228,6 +1228,14 @@ void wxMainFrame::ExecuteMuTool(const wxArrayString& args, const wxFileName& cwd
     ExecuteCmd(mutool, options_to_str(args), cwd, temporaryFiles);
 }
 
+void wxMainFrame::post_focus_list() const
+{
+    wxVector<wxVariant> vempty;
+    wxScopedPtr<wxThreadEvent> threadEvent(new wxThreadEvent);
+    threadEvent->SetPayload(vempty);
+    wxQueueEvent(GetEventHandler(), threadEvent.release());
+}
+
 void wxMainFrame::OnUpdateButtonAdd(wxUpdateUIEvent& event)
 {
     const wxThread* thread = GetThread();
@@ -1240,7 +1248,7 @@ void wxMainFrame::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
         _("Specify input file"),
         wxEmptyString,
         wxEmptyString,
-        _("JPEG files|*.jpg;*.jpeg|PNG files|*.png|SVG files|*.svg|PDF files|*.pdf|All files|*"),
+        _("JPEG files|*.jpg;*.jpeg|PNG files|*.png|SVG files|*.svg|PDF files|*.pdf|JPEG 2000 files|*.jp2|All files|*"),
         wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_MULTIPLE));
 
     if (!dlgFile) return;
@@ -1267,6 +1275,8 @@ void wxMainFrame::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
     {
         GetThread()->Run();
     }
+
+    post_focus_list();
 }
 
 void wxMainFrame::OnUpdateButtonDelete(wxUpdateUIEvent& event)
@@ -1301,9 +1311,11 @@ void wxMainFrame::OnButtonDelete(wxCommandEvent& WXUNUSED(event))
         m_listViewInputFiles->GetModel()->GetChildren(emptyItem, sel);
         if (!sel.empty())
         {
-            m_listViewInputFiles->SetCurrentItem(sel.Last());
+            m_listViewInputFiles->Select(sel.Last());
         }
     }
+
+    post_focus_list();
 }
 
 void wxMainFrame::OnUpdateDst(wxUpdateUIEvent& WXUNUSED(event))
@@ -1462,14 +1474,23 @@ void wxMainFrame::delete_temporary_files()
 void wxMainFrame::OnItemUpdated(wxThreadEvent& event)
 {
     const wxVector<wxVariant> evPayload = event.GetPayload<wxVector<wxVariant>>();
-    wxASSERT(evPayload.size() == 3);
+    switch (evPayload.size())
     {
-        wxWindowUpdateLocker locker(m_listViewInputFiles);
-        const wxDataViewItem item(evPayload[0].GetVoidPtr());
+        case 0:
+        m_listViewInputFiles->SetFocus();
+        break;
 
-        wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
-        dataModel->SetValue(evPayload[1], item, 2);
-        dataModel->SetValue(evPayload[2], item, 3);
+        case 3:
+        {
+            wxWindowUpdateLocker locker(m_listViewInputFiles);
+            const wxDataViewItem item(evPayload[0].GetVoidPtr());
+
+            wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
+            dataModel->SetValue(evPayload[1], item, 2);
+            dataModel->SetValue(evPayload[2], item, 3);
+
+            break;
+        }
     }
 }
 
