@@ -43,6 +43,8 @@ IF(DEFINED MINGW_CFG_FILE)
 	)
 ENDIF()
 
+ADD_DEPENDENCIES(wxImg2PdfGui license img2pdf-js)
+
 INSTALL(
 	TARGETS wxImg2PdfGui
 	DESTINATION img2pdf
