@@ -44,7 +44,7 @@ Source: *.txt; DestDir: {app}; Flags: comparetimestamp setntfscompression overwr
 Source: *.js; DestDir: {app}; Flags: comparetimestamp setntfscompression overwritereadonly uninsremovereadonly; Attribs: readonly notcontentindexed;
 
 [Icons]
-Name: {group}\{cm:img2pdf} {cm:gui}; Filename: {app}\{#Img2PdfBase}-frontend.exe; IconFilename: {app}\{#Img2PdfBase}-frontend.exe; Comment: {cm:gui_comment}
+Name: {group}\{cm:img2pdf}; Filename: {app}\{#Img2PdfBase}-frontend.exe; Comment: {cm:gui_comment}
 Name: {group}\{cm:license}; Filename: {app}\license.txt;
 Name: {group}\{cm:UninstallProgram,{cm:img2pdf}}; Filename: {uninstallexe}
 
@@ -58,9 +58,8 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\FileSystem"; ValueType: dw
 [CustomMessages]
 img2pdf=img2pdf
 en.license=License
-en.gui=GUI
-en.gui_comment=Frontend to mutool console utility
-en.gui_run=Run img2pdf frontend
+en.gui_comment=Frontend to mutool utility
+en.gui_run=Run application
  
 [Code]
 

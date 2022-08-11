@@ -64,7 +64,7 @@ EXECUTE_PROCESS(
 		/dImg2PdfFilesDir=${SETUP_FILES_DIR}
 		/dImg2PdfBase=${CFG_PACKAGE_NAME}
 		/dImg2PdfExe=${SETUP_FILES_DIR}/img2pdf-frontend.exe
-		/dSetupIconFile=${CMAKE_CURRENT_LIST_DIR}/../gui/icons/cd_mka.ico
+		/dSetupIconFile=${CMAKE_CURRENT_LIST_DIR}/../gui/ico/picture-as-pdf.ico
 		/dImg2PdfArch=x64
 		/dImg2PdfTouchDate=${TOUCH_DATE}
 		/dImg2PdfTouchTime=${TOUCH_TIME}
