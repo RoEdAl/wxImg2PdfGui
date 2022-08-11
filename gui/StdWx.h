@@ -32,7 +32,7 @@
 #include <wx/statline.h>
 #include <wx/valgen.h>
 #include <wx/notebook.h>
-//#include <wx/listctrl.h>
+#include <wx/bmpbuttn.h>
 #include <wx/dataview.h>
 #include <wx/collpane.h>
 #include <wx/frame.h>

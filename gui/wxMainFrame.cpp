@@ -105,6 +105,16 @@ namespace
         return new wxButton(parent, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     }
 
+    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxIconBundle& iconBundle)
+    {
+        return new wxBitmapButton(parentSizer->GetStaticBox(), wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle));
+    }
+
+    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxIconBundle& iconBundle)
+    {
+        return new wxBitmapButton(parent, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle));
+    }
+
     wxTextCtrl* create_text_ctrl(wxWindow* parent, const wxString& label = wxEmptyString, unsigned long maxLength = 0)
     {
         wxTextCtrl* const res = new wxTextCtrl(parent, wxID_ANY, label);
@@ -363,16 +373,16 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
             innerSizer->Add(0, 0, 1, wxEXPAND);
 
             {
-                wxButton* const button = create_button(sizer, wxS("\uFF0B"));
-                button->SetFont(toolFontEx);
+                const wxIconBundle iconBundle("ico_add", nullptr);
+                wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
                 button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonAdd, this);
                 button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonAdd, this);
                 innerSizer->Add(button, btnLeft);
             }
 
             {
-                wxButton* const button = create_button(sizer, wxS("\uFF0D"));
-                button->SetFont(toolFontEx);
+                const wxIconBundle iconBundle("ico_remove", nullptr);
+                wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
                 button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDelete, this);
                 button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDelete, this);
                 innerSizer->Add(button, btnRight);
@@ -397,8 +407,8 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
             //m_textCtrlDst->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateCtrlDst, this);
             innerSizer->Add(m_textCtrlDst, wxSizerFlags(btnMiddleExp).Border(wxRIGHT));
 
-            wxButton* const button = create_button(sizer, wxS("\u22EF"));
-            button->SetFont(toolFontEx);
+            const wxIconBundle iconBundle("ico_more_horiz", nullptr);
+            wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnChooseDst, this);
             innerSizer->Add(button, btnRight);
 
@@ -591,8 +601,8 @@ wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook, const wxFont& 
         sizer->AddStretchSpacer();
 
         {
-            wxButton* const button = create_button(panel, _("Copy"));
-            button->SetFont(toolFont);
+            const wxIconBundle iconBundle("ico_content_copy", nullptr);
+            wxBitmapButton* const button = create_bitmap_button(panel, iconBundle);
             button->SetToolTip(_("Copy all messages to clipboard"));
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnCopyEvents, this);
             button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateMsgCtrls, this);

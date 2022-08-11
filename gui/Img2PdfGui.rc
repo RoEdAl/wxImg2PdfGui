@@ -7,6 +7,13 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 
 #include <app_config.h>
 
+ico_picture_as_pdf ICON "ico/picture-as-pdf.ico"
+ico_content_copy ICON "ico/content-copy.ico"
+ico_more_horiz ICON "ico/more-horiz.ico"
+ico_add ICON "ico/add.ico"
+ico_remove ICON "ico/remove.ico"
+ico_image ICON "ico/image.ico"
+
 /*
 	Version
 */
