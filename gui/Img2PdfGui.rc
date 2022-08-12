@@ -34,14 +34,14 @@ BEGIN
     BEGIN
         BLOCK "000004b0"
         BEGIN
-            VALUE "Comments", "Frontend to mutool from MuPDF package"
+            VALUE "Comments", "Image to PDF converter without re-encoding"
             VALUE "CompanyName", "Edmunt Pienkowsky - roed@onet.eu"
-            VALUE "FileDescription", "Image to PDF coverter without re-encoding [GUI]"
+            VALUE "FileDescription", "Image to PDF coverter"
             VALUE "FileVersion", PROJECT_VERSION_STR4
             VALUE "InternalName", "wxImg2PdfGui"
             VALUE "LegalCopyright", "Simplified BSD License - http://www.opensource.org/licenses/bsd-license.html"
-            VALUE "OriginalFilename", "img2pdf-frontend.exe"
-            VALUE "ProductName", "img2pdf-frontend"
+            VALUE "OriginalFilename", "wximg2pdf.exe"
+            VALUE "ProductName", "wximg2pdf"
             VALUE "ProductVersion", PROJECT_VERSION_STR4
         END
     END

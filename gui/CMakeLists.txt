@@ -1,6 +1,7 @@
 #
 # img2pdfGUI
 #
+
 FILE(GLOB IMG2PDF_GUI_HEADER_FILES "*.h")
 FILE(GLOB IMG2PDF_GUI_ICON_FILES "*.ico" )
 GET_FILENAME_COMPONENT(IMG2PDF_GUI_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
@@ -25,7 +26,7 @@ ADD_EXECUTABLE(wxImg2PdfGui WIN32
 ConfigureWxApp(wxImg2PdfGui)
 ConfigureWxWidgetsUsage(wxImg2PdfGui)
 ConfigureSourceEncoding(wxImg2PdfGui)
-SET_PROPERTY(TARGET wxImg2PdfGui PROPERTY OUTPUT_NAME img2pdf-frontend)
+SET_PROPERTY(TARGET wxImg2PdfGui PROPERTY OUTPUT_NAME wximg2pdf)
 TARGET_LINK_LIBRARIES(wxImg2PdfGui
 	PRIVATE wxCmdTools wxEncodingDetection nlohmann_json::nlohmann_json
 )
