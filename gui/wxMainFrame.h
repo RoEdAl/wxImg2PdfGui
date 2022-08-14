@@ -8,6 +8,10 @@
 #include "LogListBox.h"
 #endif
 
+#ifndef _VARIANT_EXT_H_
+#include "VariantExt.h"
+#endif
+
 class wxMainFrame:
     public wxFrame, wxThreadHelper
 {
@@ -18,7 +22,9 @@ class wxMainFrame:
     protected:
 
     wxNotebook* m_notebook;
+    wxSizer* m_sizerInputFiles;
     wxDataViewListCtrl* m_listViewInputFiles;
+    wxStaticText* m_staticTextCommonDir;
     wxCheckBox* m_checkBoxVerbose;
     wxCheckBox* m_checkBoxSwitchToMessagesPane;
     wxTextCtrl* m_textCtrlDst;
@@ -65,7 +71,9 @@ class wxMainFrame:
     void OnButtonAdd(wxCommandEvent&);
     void OnUpdateButtonDelete(wxUpdateUIEvent&);
     void OnButtonDelete(wxCommandEvent&);
-    void OnUpdateDst(wxUpdateUIEvent&);
+    void OnUpdateButtonResolutionScale(wxUpdateUIEvent&);
+    void OnButtonResolutionScale(wxCommandEvent&);
+    void OnButtonClearResolutionScale(wxCommandEvent&);
     void OnChooseDst(wxCommandEvent&);
     void OnCheckAutoScroll(wxCommandEvent&);
     void OnCheckShowTimestamps(wxCommandEvent&);
@@ -115,6 +123,8 @@ class wxMainFrame:
     wxString m_execButtonCaptionKill;
     wxString m_logTimestamp;
     bool     m_autoScroll;
+
+    wxObjectDataPtr<wxFileNameRefData> m_commonDir;
 
     public:
 

@@ -5,6 +5,10 @@
 #ifndef _WX_MY_APP_H_
 #define _WX_MY_APP_H_
 
+#ifndef _VARIANT_EXT_H_
+#include "VariantExt.h"
+#endif
+
 class wxMyApp:
     public wxApp
 {
@@ -27,7 +31,7 @@ class wxMyApp:
 
     void ShowToolPaths() const;
     bool ShowLogTimestamps(bool showTimestamps = true);
-    bool GetFnColumn(const wxFileName&, wxVector<wxVariant>&) const;
+    bool GetFnColumn(const wxRelativeFileName&, wxVector<wxVariant>&) const;
     const wxIconBundle& GetAppIcon() const;
 
     protected:
@@ -38,8 +42,9 @@ class wxMyApp:
 
     wxFileName m_scriptPath;
     wxFileName m_muToolPath;
-    std::unordered_map<wxString, wxIconBundle> m_iconMap;
+    std::unordered_map<wxString, wxBitmapBundle> m_bitmapMap;
     wxIconBundle m_appIcons;
+    wxVariant m_null;
 
     public:
 

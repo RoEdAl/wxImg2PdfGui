@@ -13,6 +13,9 @@ ico_more_horiz ICON "ico/more-horiz.ico"
 ico_add ICON "ico/add.ico"
 ico_remove ICON "ico/remove.ico"
 ico_image ICON "ico/image.ico"
+ico_link ICON "ico/link.ico"
+ico_acpect_ratio ICON "ico/aspect-ratio.ico"
+ico_clear ICON "ico/clear.ico"
 
 /*
 	Version

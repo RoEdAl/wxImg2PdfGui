@@ -13,6 +13,7 @@ SET(IMG2PDF_GUI_SOURCE_FILES
 	wxMainFrame.cpp
 	LogListBox.cpp
 	VariantExt.cpp
+	SizeDialog.cpp
 )
 
 ADD_EXECUTABLE(wxImg2PdfGui WIN32

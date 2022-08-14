@@ -5,13 +5,14 @@
 #include <app_config.h>
 #include "wxApp.h"
 #include "wxMainFrame.h"
-#include "VariantExt.h"
+#include "SizeDialog.h"
 
 namespace
 {
     const int DEF_MARGIN = 2;
     const int AUTO_SCROLL_UPDATE_INTERVAL = 2000;
     const int TIMER_IDLE_WAKE_UP_INTERVAL = 250;
+    const int TIMER_LAYOUT = 2000;
 
     template<typename T>
     const T* get_variant_data(const wxVariant& v)
@@ -48,9 +49,9 @@ namespace
         return wxSizerFlags().CenterVertical().Border(wxLEFT | wxRIGHT, wnd->FromDIP(DEF_MARGIN)).Proportion(0);
     }
 
-    wxSizerFlags get_middle_exp_crtl_sizer_flags(wxWindow* wnd)
+    wxSizerFlags get_left_exp_crtl_sizer_flags(wxWindow* wnd)
     {
-        return wxSizerFlags().Border(wxLEFT | wxRIGHT, wnd->FromDIP(DEF_MARGIN)).Proportion(1).Expand();
+        return wxSizerFlags().CenterVertical().Border(wxRIGHT, wnd->FromDIP(DEF_MARGIN)).Proportion(1);
     }
 
     wxSizerFlags get_right_crtl_sizer_flags(wxWindow* wnd)
@@ -126,6 +127,27 @@ namespace
     wxTextCtrl* create_text_ctrl(const wxStaticBoxSizer* parentSizer, const wxString& label = wxEmptyString, unsigned long maxLength = 0)
     {
         return create_text_ctrl(parentSizer->GetStaticBox(), label, maxLength);
+    }
+
+    wxStaticText* create_ro_text_ctrl(wxWindow* parent)
+    {
+        wxStaticText* const res = new wxStaticText(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT | wxST_ELLIPSIZE_MIDDLE);
+        return res;
+    }
+
+    wxStaticText* create_ro_text_ctrl(const wxStaticBoxSizer* parentSizer)
+    {
+        return create_ro_text_ctrl(parentSizer->GetStaticBox());
+    }
+
+    wxStaticLine* create_horizontal_static_line(wxWindow* parent)
+    {
+        return new wxStaticLine(parent, wxID_ANY, wxDefaultPosition, wxSize(0, parent->FromDIP(1)), wxLI_HORIZONTAL);
+    }
+
+    wxSizerFlags get_horizontal_static_line_sizer_flags(wxWindow* wnd)
+    {
+        return wxSizerFlags().Expand().Border(wxTOP | wxBOTTOM, wnd->FromDIP(2));
     }
 
     class CollapsiblePaneUiUpdater
@@ -252,12 +274,16 @@ namespace
         return fn;
     }
 
-    void append_item(wxDataViewListCtrl* const listCtrl, const wxFileName& fn)
+    void append_item(wxDataViewListCtrl* const listCtrl, const wxFileName& fn, const wxObjectDataPtr<wxFileNameRefData>& commonDir)
     {
         wxVector<wxVariant> data;
-        if (wxGetApp().GetFnColumn(fn, data))
+        if (wxGetApp().GetFnColumn(wxRelativeFileName(fn, commonDir), data))
         {
             listCtrl->AppendItem(data);
+        }
+        else
+        {
+            wxLogVerbose(_("Unable to add input file: %s"), fn.GetFullName());
         }
     }
 
@@ -323,72 +349,118 @@ namespace
     };
 }
 
-wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& toolFont, const wxFont& toolFontEx, const wxSizerFlags& btnLeft, const wxSizerFlags& btnMiddle, const wxSizerFlags& btnMiddleExp, const wxSizerFlags& btnRight)
+wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& toolFont, const wxFont& toolFontEx, const wxSizerFlags& btnLeft, const wxSizerFlags& btnMiddle, const wxSizerFlags& btnLeftExp, const wxSizerFlags& btnRight)
 {
     wxPanel* const    panel = new wxPanel(notebook);
     wxBoxSizer* const panelSizer = new wxBoxSizer(wxVERTICAL);
 
     {
         wxStaticBoxSizer* const sizer = create_static_box_sizer(panel, _("Sources"), wxVERTICAL);
-
-        m_listViewInputFiles = new wxDataViewListCtrl(sizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_VERT_RULES | wxDV_MULTIPLE | wxDV_ROW_LINES);
-
-        wxDataViewBitmapRenderer* const bitmapRenderer = new wxDataViewBitmapRenderer(wxS("wxBitmapBundle"));
-        wxDataViewColumn* const iconColumn = new wxDataViewColumn(wxS("#"), bitmapRenderer, 0, wxCOL_WIDTH_AUTOSIZE);
-        iconColumn->SetSortable(false);
-        iconColumn->SetReorderable(false);
-        iconColumn->SetResizeable(false);
-        m_listViewInputFiles->AppendColumn(iconColumn);
-
-        wxDataViewTextRenderer* const pathRenderer = new wxDataViewTextRenderer(wxS("wxFileName"));
-        wxDataViewColumn* const pathColumn = new wxDataViewColumn(_("File"), pathRenderer, 1, wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT);
-        pathColumn->SetSortable(false);
-        pathColumn->SetReorderable(false);
-        pathColumn->SetResizeable(false);
-        m_listViewInputFiles->AppendColumn(pathColumn);
-
-        const wxSize minSize = calc_text_size(15);
-        wxDataViewTextRenderer* const sizeRenderer = new wxDataViewTextRenderer(wxS("wxSize"));
-        wxDataViewColumn* const sizeColumn = new wxDataViewColumn(_wxS("Size\u00A0[px]"), sizeRenderer, 2, wxCOL_WIDTH_AUTOSIZE);
-        sizeColumn->SetSortable(false);
-        sizeColumn->SetReorderable(false);
-        sizeColumn->SetResizeable(false);
-        sizeColumn->SetMinWidth(minSize.GetWidth());
-        m_listViewInputFiles->AppendColumn(sizeColumn);
-
-        wxDataViewTextRenderer* const resolutionRenderer = new wxDataViewTextRenderer(wxS("wxSize"));
-        wxDataViewColumn* const resolutionColumn = new wxDataViewColumn(_wxS("Resolution\u00A0[dpi]"), resolutionRenderer, 3, wxCOL_WIDTH_AUTOSIZE);
-        resolutionColumn->SetSortable(false);
-        resolutionColumn->SetReorderable(false);
-        resolutionColumn->SetResizeable(false);
-        m_listViewInputFiles->AppendColumn(resolutionColumn);
-
-        m_listViewInputFiles->SetExpanderColumn(pathColumn);
-
-        sizer->Add(m_listViewInputFiles, 1, wxEXPAND, btnLeft.GetBorderInPixels());
-
         {
             wxBoxSizer* const innerSizer = new wxBoxSizer(wxHORIZONTAL);
 
-            innerSizer->Add(0, 0, 1, wxEXPAND);
-
             {
-                const wxIconBundle iconBundle("ico_add", nullptr);
-                wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
-                button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonAdd, this);
-                button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonAdd, this);
-                innerSizer->Add(button, btnLeft);
+                wxBoxSizer* const vinnerSizer = new wxBoxSizer(wxVERTICAL);
+
+                {
+                    m_listViewInputFiles = new wxDataViewListCtrl(sizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_VERT_RULES | wxDV_MULTIPLE | wxDV_ROW_LINES);
+
+                    wxDataViewBitmapRenderer* const bitmapRenderer = new wxDataViewBitmapRenderer(wxS("wxBitmapBundle"));
+                    wxDataViewColumn* const iconColumn = new wxDataViewColumn(wxS("#"), bitmapRenderer, 0, wxCOL_WIDTH_AUTOSIZE);
+                    iconColumn->SetSortable(false);
+                    iconColumn->SetReorderable(false);
+                    iconColumn->SetResizeable(false);
+                    m_listViewInputFiles->AppendColumn(iconColumn);
+
+                    wxDataViewTextRenderer* const pathRenderer = new wxDataViewTextRenderer(wxS("wxRelativeFileName"));
+                    wxDataViewColumn* const pathColumn = new wxDataViewColumn(_("File"), pathRenderer, 1, wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT);
+                    pathColumn->SetSortable(false);
+                    pathColumn->SetReorderable(false);
+                    pathColumn->SetResizeable(false);
+                    m_listViewInputFiles->AppendColumn(pathColumn);
+
+                    const wxSize minSize = calc_text_size(15);
+                    wxDataViewTextRenderer* const sizeRenderer = new wxDataViewTextRenderer(wxS("wxSize"));
+                    wxDataViewColumn* const sizeColumn = new wxDataViewColumn(_("Size"), sizeRenderer, 2, wxCOL_WIDTH_AUTOSIZE);
+                    sizeColumn->SetSortable(false);
+                    sizeColumn->SetReorderable(false);
+                    sizeColumn->SetResizeable(false);
+                    sizeColumn->SetMinWidth(minSize.GetWidth());
+                    m_listViewInputFiles->AppendColumn(sizeColumn);
+
+                    wxDataViewTextRenderer* const resolutionRenderer = new wxDataViewTextRenderer(wxS("wxResolutionOrScale"));
+                    wxDataViewColumn* const resolutionColumn = new wxDataViewColumn(_("Resolution/Scale"), resolutionRenderer, 3, wxCOL_WIDTH_AUTOSIZE);
+                    resolutionColumn->SetSortable(false);
+                    resolutionColumn->SetReorderable(false);
+                    resolutionColumn->SetResizeable(false);
+                    m_listViewInputFiles->AppendColumn(resolutionColumn);
+
+                    wxDataViewTextRenderer* const lastRenderer = new wxDataViewTextRenderer(wxS("null"));
+                    wxDataViewColumn* const lastColumn = new wxDataViewColumn(wxEmptyString, lastRenderer, 4, wxCOL_WIDTH_AUTOSIZE);
+                    lastColumn->SetSortable(false);
+                    lastColumn->SetReorderable(false);
+                    lastColumn->SetResizeable(false);
+                    m_listViewInputFiles->AppendColumn(lastColumn);
+
+                    vinnerSizer->Add(m_listViewInputFiles, wxSizerFlags().Proportion(1).Expand());
+                }
+
+                m_staticTextCommonDir = create_ro_text_ctrl(panel);
+                m_staticTextCommonDir->SetFont(toolFont);
+                m_staticTextCommonDir->Hide();
+
+                vinnerSizer->Add(m_staticTextCommonDir, 0, wxTOP | wxBOTTOM, btnLeft.GetBorderInPixels() * 2);
+
+                innerSizer->Add(vinnerSizer, wxSizerFlags().Expand().Proportion(1));
+                m_sizerInputFiles = vinnerSizer;
             }
 
             {
-                const wxIconBundle iconBundle("ico_remove", nullptr);
-                wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
-                button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDelete, this);
-                button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDelete, this);
-                innerSizer->Add(button, btnRight);
+                wxBoxSizer* const vinnerSizer = new wxBoxSizer(wxVERTICAL);
+
+                {
+                    const wxIconBundle iconBundle("ico_add", nullptr);
+                    wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                    button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonAdd, this);
+                    button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonAdd, this);
+                    vinnerSizer->Add(button, wxSizerFlags().CentreHorizontal());
+                }
+
+                {
+                    const wxIconBundle iconBundle("ico_remove", nullptr);
+                    wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                    button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDelete, this);
+                    button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDelete, this);
+                    vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                }
+
+                {
+                    wxStaticLine* const staticLine = create_horizontal_static_line(sizer->GetStaticBox());
+                    vinnerSizer->Add(staticLine, get_horizontal_static_line_sizer_flags(sizer->GetStaticBox()));
+                }
+
+                {
+                    const wxIconBundle iconBundle("ico_acpect_ratio", nullptr);
+                    wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                    button->SetToolTip(_("Change resolution/Scale"));
+                    button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
+                    button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonResolutionScale, this);
+                    vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                }
+
+                {
+                    const wxIconBundle iconBundle("ico_clear", nullptr);
+                    wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                    button->SetToolTip(_("Use original image resolution/Do not scale image"));
+                    button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
+                    button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonClearResolutionScale, this);
+                    vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                }
+
+                innerSizer->Add(vinnerSizer, wxSizerFlags().Top().Border(wxLEFT, btnLeft.GetBorderInPixels()));
             }
 
-            sizer->Add(innerSizer, 0, wxTOP | wxBOTTOM | wxEXPAND, btnLeft.GetBorderInPixels());
+            sizer->Add(innerSizer, wxSizerFlags().Expand().Proportion(1));
         }
 
         panelSizer->Add(sizer, wxSizerFlags().Expand().Proportion(1));
@@ -405,7 +477,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
             const wxFileName fn = get_default_output_fn();
             m_textCtrlDst->SetValue(fn.GetFullPath());
             //m_textCtrlDst->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateCtrlDst, this);
-            innerSizer->Add(m_textCtrlDst, wxSizerFlags(btnMiddleExp).Border(wxRIGHT));
+            innerSizer->Add(m_textCtrlDst, btnLeftExp);
 
             const wxIconBundle iconBundle("ico_more_horiz", nullptr);
             wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
@@ -466,7 +538,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
 wxPanel* wxMainFrame::create_metadata_pannel(wxNotebook* notebook, const wxFont& toolFont, const wxSizerFlags& btnLeft, const wxSizerFlags& btnMiddle, const wxSizerFlags& centerVertical)
 {
     wxPanel* const    panel = new wxPanel(notebook);
-    wxFlexGridSizer* const panelSizer = new wxFlexGridSizer(0, 2, btnLeft.GetBorderInPixels(), btnLeft.GetBorderInPixels());
+    wxFlexGridSizer* const panelSizer = new wxFlexGridSizer(0, 2, btnLeft.GetBorderInPixels() * 2, btnLeft.GetBorderInPixels() * 2);
     panelSizer->AddGrowableCol(1);
 
     {
@@ -616,11 +688,11 @@ wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook, const wxFont& 
     return panel;
 }
 
-wxNotebook* wxMainFrame::create_notebook(const wxFont& toolFont, const wxFont& toolFontEx, const wxSizerFlags& btnLeft, const wxSizerFlags& btnMiddle, const wxSizerFlags& btnMiddleExp, const wxSizerFlags& btnRight, const wxSizerFlags& centerVertical)
+wxNotebook* wxMainFrame::create_notebook(const wxFont& toolFont, const wxFont& toolFontEx, const wxSizerFlags& btnLeft, const wxSizerFlags& btnMiddle, const wxSizerFlags& btnLeftExp, const wxSizerFlags& btnRight, const wxSizerFlags& centerVertical)
 {
     wxNotebook* const notebook = new wxNotebook(this, wxID_ANY);
 
-    notebook->AddPage(create_src_dst_pannel(notebook, toolFont, toolFontEx, btnLeft, btnMiddle, btnMiddleExp, btnRight), _("Source and destination"), true);
+    notebook->AddPage(create_src_dst_pannel(notebook, toolFont, toolFontEx, btnLeft, btnMiddle, btnLeftExp, btnRight), _("Source and destination"), true);
     notebook->AddPage(create_metadata_pannel(notebook, toolFont, btnLeft, btnMiddle, centerVertical), _("Metadata"));
     notebook->AddPage(create_messages_panel(notebook, toolFont, btnLeft, btnMiddle, btnRight, centerVertical), _("Messages"));
 
@@ -667,7 +739,8 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
     m_logTimestamp(wxLog::GetTimestamp()),
     m_execButtonCaptionRun(_("Run")),
     m_execButtonCaptionKill(_("Kill")),
-    m_autoScroll(true)
+    m_autoScroll(true),
+    m_commonDir(wxFileNameRefData::Get())
 {
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_FRAMEBK));
     SetIcons(wxGetApp().GetAppIcon());
@@ -678,12 +751,12 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
         const wxSizerFlags btnLeft(get_left_ctrl_sizer_flags(this));
         const wxSizerFlags btnMiddle(get_middle_crtl_sizer_flags(this));
-        const wxSizerFlags btnMiddleExp(get_middle_exp_crtl_sizer_flags(this));
+        const wxSizerFlags btnLeftExp(get_left_exp_crtl_sizer_flags(this));
         const wxSizerFlags btnRight(get_right_crtl_sizer_flags(this));
         const wxSizerFlags centerVertical(get_vertical_allign_sizer_flags());
 
         wxBoxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
-        sizer->Add(m_notebook = create_notebook(toolFont, toolFontEx, btnLeft, btnMiddle, btnMiddleExp, btnRight, centerVertical), 1, wxEXPAND);
+        sizer->Add(m_notebook = create_notebook(toolFont, toolFontEx, btnLeft, btnMiddle, btnLeftExp, btnRight, centerVertical), 1, wxEXPAND);
         sizer->Add(create_bottom_ctrls(toolFont, btnLeft, btnMiddle, btnRight, centerVertical), 0, wxEXPAND | wxALL, FromDIP(DEF_MARGIN*2));
         this->SetSizerAndFit(sizer);
     }
@@ -708,7 +781,7 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
     m_timerIdleWakeUp.Bind(wxEVT_TIMER, &wxMainFrame::OnIdleWakeupTimer, this);
     m_timerAutoScroll.Bind(wxEVT_TIMER, &wxMainFrame::OnAutoScrollTimer, this);
-
+    
     Bind(wxEVT_THREAD, &wxMainFrame::OnItemUpdated, this);
 
     SetDropTarget(new DropTarget(this));
@@ -1064,6 +1137,11 @@ namespace
             dt.GetHour(), dt.GetMinute()
         });
     }
+
+    bool is_valid_size(const wxSize& sz)
+    {
+        return sz.x > 0 && sz.y > 0;
+    }
 }
 
 void wxMainFrame::build_script(wxJson& json, wxFileName& workingDirectory) const
@@ -1184,8 +1262,9 @@ void wxMainFrame::build_script(wxJson& json, wxFileName& workingDirectory) const
         {
             wxVariant v;
             dataModel->GetValue(v, i, 1);
-            if (v.GetType().CmpNoCase(wxS("wxFileName")) != 0) continue;
-            const wxFileName& fn = get_variant_custom_val<wxVariantDataFileName>(v);
+            if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) continue;
+            const wxRelativeFileName& rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+            const wxFileName& fn = rfn.GetFileName();
             const wxString ext = fn.GetExt().MakeLower();
             if (ext.CmpNoCase("pdf") == 0)
             {
@@ -1195,13 +1274,55 @@ void wxMainFrame::build_script(wxJson& json, wxFileName& workingDirectory) const
             }
             else if (ext.CmpNoCase("svg") == 0)
             {
+                dataModel->GetValue(v, i, 3);
+                if (v.GetType().CmpNoCase(wxS("wxResolutionOrScale")) != 0) continue;
+                const wxResolutionOrScale& ros = get_variant_custom_val<wxVariantDataResolutionOrScale>(v);
+                wxASSERT(!ros.HasResolution());
+                float sx, sy;
+                ros.GetScale(sx, sy);
+
                 wxJson doc;
                 doc["doc"] = fn.GetFullPath().utf8_string();
+                if (sx > 0.0f && sy > 0.0f)
+                {
+                    if (sx == sy)
+                    {
+                        doc["scale"] = sx;
+                    }
+                    else
+                    {
+                        doc["scaleX"] = sx;
+                        doc["scaleY"] = sy;
+                    }
+                }
                 src.push_back(doc);
             }
             else // image file
             {
-                src.push_back(fn.GetFullPath().utf8_string());
+                dataModel->GetValue(v, i, 3);
+                if (v.GetType().CmpNoCase(wxS("wxResolutionOrScale")) != 0) continue;
+                const wxResolutionOrScale& ros = get_variant_custom_val<wxVariantDataResolutionOrScale>(v);
+                wxASSERT(ros.HasResolution());
+                const wxSize sz = ros.GetSize();
+                if (is_valid_size(sz))
+                {
+                    wxJson img;
+                    img["img"] = fn.GetFullPath().utf8_string();
+                    if (sz.x == sz.y)
+                    {
+                        img["resolution"] = sz.x;
+                    }
+                    else
+                    {
+                        img["resolutionX"] = sz.x;
+                        img["resolutionY"] = sz.y;
+                    }
+                    src.push_back(img);
+                }
+                else
+                {
+                    src.push_back(fn.GetFullPath().utf8_string());
+                }
             }
         }
 
@@ -1272,12 +1393,12 @@ void wxMainFrame::OnDropFiles(const wxArrayString& fileNames)
         }
     }
 
-    wxWindowUpdateLocker locker(m_notebook);
+    const wxWindowUpdateLocker locker(m_notebook);
 
     m_notebook->ChangeSelection(0);
     for (const auto& i : fileNames)
     {
-        append_item(m_listViewInputFiles, wxFileName::FileName(i));
+        append_item(m_listViewInputFiles, wxFileName::FileName(i), m_commonDir);
     }
 
     const wxThreadError threadRes = CreateThread();
@@ -1323,12 +1444,12 @@ void wxMainFrame::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
 
     {
         wxBusyCursor busy;
-        wxWindowUpdateLocker locker(m_listViewInputFiles);
+        const wxWindowUpdateLocker locker(m_listViewInputFiles);
 
         for(const auto& i : fileNames)
         {
             fileName.SetFullName(i);
-            append_item(m_listViewInputFiles, fileName);
+            append_item(m_listViewInputFiles, fileName, m_commonDir);
         }
     }
 
@@ -1360,7 +1481,7 @@ void wxMainFrame::OnButtonDelete(wxCommandEvent& WXUNUSED(event))
     m_listViewInputFiles->GetSelections(sel);
 
     {
-        wxWindowUpdateLocker locker(m_listViewInputFiles);
+        const wxWindowUpdateLocker locker(m_listViewInputFiles);
 
         for(const wxDataViewItem& i : sel)
         {
@@ -1377,11 +1498,208 @@ void wxMainFrame::OnButtonDelete(wxCommandEvent& WXUNUSED(event))
         }
     }
 
+    const wxThreadError threadRes = CreateThread();
+    if (threadRes == wxTHREAD_NO_ERROR)
+    {
+        GetThread()->Run();
+    }
+
     post_focus_list();
 }
 
-void wxMainFrame::OnUpdateDst(wxUpdateUIEvent& WXUNUSED(event))
+namespace
 {
+    bool exclusive_bool(const bool b1, const bool b2)
+    {
+        int cnt = 0;
+        if (b1) cnt += 1;
+        if (b2) cnt += 1;
+        return cnt == 1;
+    }
+
+    bool exclusive_bool(const bool b1, const bool b2, const bool b3)
+    {
+        int cnt = 0;
+        if (b1) cnt += 1;
+        if (b2) cnt += 1;
+        if (b3) cnt += 1;
+        return cnt == 1;
+    }
+
+    bool exclusive_cnt(const size_t cnt1, const size_t cnt2)
+    {
+        return exclusive_bool(cnt1 > 0, cnt2 > 0);
+    }
+
+    bool exclusive_cnt(const size_t cnt1, const size_t cnt2, const size_t cnt3)
+    {
+        return exclusive_bool(cnt1 > 0, cnt2 > 0, cnt3 > 0);
+    }
+
+    wxSize normalize_size(const wxSize& sz)
+    {
+        return wxSize(sz.x < 0 ? 0 : sz.x, sz.y < 0 ? 0 : sz.y);
+    }
+
+    wxSize get_common_size(const wxVector<wxSize>& asz)
+    {
+        if (asz.empty()) return wxSize();
+        if (asz.size() == 1) return normalize_size(asz[0]);
+
+        wxSize res(asz[0]);
+        bool commonW = true, commonH = true;
+        for (wxVector<wxSize>::const_iterator i = asz.begin() + 1, end = asz.end(); i != end; ++i)
+        {
+            if (i->GetWidth() != res.GetWidth()) commonW = false;
+            if (i->GetHeight() != res.GetHeight()) commonH = false;
+        }
+
+        if (!commonW) res.SetWidth(0);
+        if (!commonH) res.SetHeight(0);
+        return res;
+    }
+}
+
+void wxMainFrame::OnUpdateButtonResolutionScale(wxUpdateUIEvent& event)
+{
+    if (m_listViewInputFiles->GetSelectedItemsCount() > 0)
+    {
+        {
+            const wxThread* thread = GetThread();
+            if (thread != nullptr && thread->IsAlive())
+            {
+                event.Enable(false);
+                return;
+            }
+        }
+
+        wxDataViewItemArray elems;
+        m_listViewInputFiles->GetSelections(elems);
+
+        size_t cntImg = 0, cntPdf = 0, cntDoc = 0;
+        wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
+
+        for (const auto& i : elems)
+        {
+            wxVariant v;
+            dataModel->GetValue(v, i, 1);
+            if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) continue;
+            const wxRelativeFileName& rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+            const wxFileName& fn = rfn.GetFileName();
+            const wxString ext = fn.GetExt().MakeLower();
+            if (ext.CmpNoCase("pdf") == 0)
+            {
+                cntPdf += 1;
+            }
+            else if (ext.CmpNoCase("svg") == 0)
+            {
+                cntDoc += 1;
+            }
+            else
+            {
+                cntImg += 1;
+            }
+        }
+
+        event.Enable(exclusive_cnt(cntImg, cntPdf, cntDoc) && (cntPdf == 0));
+    }
+    else
+    {
+        event.Enable(false);
+    }
+}
+
+void wxMainFrame::OnButtonResolutionScale(wxCommandEvent& WXUNUSED(event))
+{
+    wxDataViewItemArray elems;
+    m_listViewInputFiles->GetSelections(elems);
+    wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
+
+    wxVector<wxSize> resolutions;
+    wxVector<wxSize> scales;
+    for (const auto& i : elems)
+    {
+        wxVariant v;
+        dataModel->GetValue(v, i, 3);
+        if (v.GetType().CmpNoCase(wxS("wxResolutionOrScale")) != 0) continue;
+        const wxResolutionOrScale& ros = get_variant_custom_val<wxVariantDataResolutionOrScale>(v);
+        (ros.HasResolution() ? resolutions : scales).push_back(ros.GetSize());
+    }
+
+    if (!exclusive_cnt(resolutions.size(), scales.size()))
+    {
+        return;
+    }
+
+    if (!resolutions.empty())
+    {
+        const wxSize commonRes = get_common_size(resolutions);
+
+        wxScopedPtr<SizeDialog> dlg(new SizeDialog(this, wxID_ANY, _("Specify image(s) resolution")));
+        dlg->SetValue(commonRes);
+        const int res = dlg->ShowModal();
+        if (res != wxID_OK) return;
+        const wxSize newRes = dlg->GetValue();
+
+        {
+            const wxWindowUpdateLocker locker(m_listViewInputFiles);
+            for (const auto& i : elems)
+            {
+                dataModel->SetValue(wxVariantDataResolutionOrScale::GetResolution(newRes), i, 3);
+            }
+        }
+    }
+
+    if (!scales.empty())
+    {
+
+    }
+}
+
+void wxMainFrame::OnButtonClearResolutionScale(wxCommandEvent& WXUNUSED(event))
+{
+    wxDataViewItemArray elems;
+    m_listViewInputFiles->GetSelections(elems);
+    wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
+
+    int cnt = 0;
+    {
+        const wxWindowUpdateLocker locker(m_listViewInputFiles);
+
+        const wxSize sizeCleared(-1, -1);
+        const wxSize sizeUndetermined(0, 0);
+
+        for (const auto& i : elems)
+        {
+            wxVariant v;
+            dataModel->GetValue(v, i, 1);
+            if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) continue;
+            const wxRelativeFileName& rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+            const wxFileName& fn = rfn.GetFileName();
+            const wxString ext = fn.GetExt().MakeLower();
+            const bool undeterminedSize = ext.CmpNoCase("pdf") == 0 || ext.CmpNoCase("jp2") == 0 || ext.CmpNoCase("svg") == 0;
+            if (undeterminedSize)
+            {
+                dataModel->SetValue(wxVariantDataResolutionOrScale::GetScale(sizeUndetermined), i, 3);
+            }
+            else
+            {
+                dataModel->SetValue(wxVariantDataResolutionOrScale::GetResolution(sizeCleared), i, 3);
+            }
+            cnt += 1;
+        }
+    }
+
+    if (cnt > 0)
+    {
+        const wxThreadError threadRes = CreateThread();
+        if (threadRes == wxTHREAD_NO_ERROR)
+        {
+            GetThread()->Run();
+        }
+
+        post_focus_list();
+    }
 }
 
 void wxMainFrame::OnChooseDst(wxCommandEvent& WXUNUSED(event))
@@ -1539,17 +1857,44 @@ void wxMainFrame::OnItemUpdated(wxThreadEvent& event)
     switch (evPayload.size())
     {
         case 0:
-        m_listViewInputFiles->SetFocus();
-        break;
+        {
+            m_listViewInputFiles->SetFocus();
+            break;
+        }
+
+        case 1:
+        {
+            const wxWindowUpdateLocker locker(m_listViewInputFiles);
+            m_commonDir->GetFileName().Assign(get_variant_custom_val<wxVariantDataFileName>(evPayload[0]));
+            {
+                wxDataViewItemArray elems;
+                m_listViewInputFiles->GetModel()->GetChildren(wxDataViewItem(), elems);
+                m_listViewInputFiles->GetModel()->ItemsChanged(elems);
+            }
+
+            if (m_commonDir->GetFileName().IsOk())
+            {
+                m_staticTextCommonDir->SetLabel(m_commonDir->GetFileName().GetFullPath());
+                m_staticTextCommonDir->Show();
+            }
+            else
+            {
+                m_staticTextCommonDir->SetLabel(wxEmptyString);
+                m_staticTextCommonDir->Show(false);
+            }
+            m_sizerInputFiles->Layout();
+            break;
+        }
 
         case 3:
         {
-            wxWindowUpdateLocker locker(m_listViewInputFiles);
+            const wxWindowUpdateLocker locker(m_listViewInputFiles);
             const wxDataViewItem item(evPayload[0].GetVoidPtr());
 
             wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
             dataModel->SetValue(evPayload[1], item, 2);
-            dataModel->SetValue(evPayload[2], item, 3);
+            const wxSize& sz = get_variant_custom_val<wxVariantDataSize>(evPayload[2]);
+            dataModel->SetValue(wxVariantDataResolutionOrScale::GetResolution(sz), item, 3);
 
             break;
         }
@@ -1562,6 +1907,89 @@ namespace
     {
         return sz.x < 0 || sz.y < 0;
     }
+
+    wxString get_array_item(const wxArrayString& a, const size_t idx)
+    {
+        const size_t cnt = a.GetCount();
+        if (idx >= cnt) return wxEmptyString;
+        return a[idx];
+    }
+
+    wxFileName truncate_dir_path(const wxFileName& fn, const size_t dirCnt)
+    {
+        wxFileName res(fn);
+
+        while (res.GetDirCount() > dirCnt)
+        {
+            res.RemoveLastDir();
+        }
+
+        if (res.GetDirCount() == 0)
+        {
+            res.Clear();
+        }
+
+        return res;
+    }
+
+    wxFileName find_common_path(const wxVector<wxFileName>& paths)
+    {
+        if (paths.empty()) return wxFileName();
+
+        const size_t cnt = paths.size();
+
+        wxFileName path;
+        path.AssignDir(wxFileName(paths[0]).GetPath());
+        if (cnt == 1) return path;
+        size_t dirCnt = path.GetDirCount();
+
+        wxVector<wxFileName> fn;
+
+        for (size_t i = 1; i < cnt; ++i)
+        {
+            wxFileName f;
+            f.AssignDir(wxFileName(paths[i]).GetPath());
+
+            const size_t dirCnt1 = f.GetDirCount();
+
+            if (dirCnt1 > dirCnt) dirCnt = dirCnt1;
+
+            fn.push_back(f);
+        }
+
+        // check drive
+        const wxString vol = path.GetVolume();
+
+        for(const auto& i : fn)
+        {
+            const wxString jvol = i.GetVolume();
+            if (vol.CmpNoCase(jvol) != 0) return wxFileName();
+        }
+
+        // check dir components
+        for (size_t i = 0; i < dirCnt; ++i)
+        {
+            const wxString dir = get_array_item(path.GetDirs(), i);
+
+            if (dir.IsEmpty()) return truncate_dir_path(path, i);
+
+            for(const auto& j : fn)
+            {
+                const wxString jdir = get_array_item(j.GetDirs(), i);
+
+                if (jdir.IsEmpty() || (dir.CmpNoCase(jdir) != 0)) return truncate_dir_path(path, i);
+            }
+        }
+
+        return truncate_dir_path(path, dirCnt);
+    }
+
+    wxThreadEvent* create_thread_event(const wxVector<wxVariant>& payload)
+    {
+        wxThreadEvent* const ev = new wxThreadEvent();
+        ev->SetPayload(payload);
+        return ev;
+    }
 }
 
 wxThread::ExitCode wxMainFrame::Entry()
@@ -1572,6 +2000,7 @@ wxThread::ExitCode wxMainFrame::Entry()
 
     wxDataViewItemArray elems;
     dataModel->GetChildren(wxDataViewItem(), elems);
+    wxVector<wxFileName> afn;
     for (const auto& i : elems)
     {
         if (GetThread()->TestDestroy()) break;
@@ -1582,21 +2011,24 @@ wxThread::ExitCode wxMainFrame::Entry()
         wxVariant v;
 
         dataModel->GetValue(v, i, 1);
-        if (v.GetType().CmpNoCase(wxS("wxFileName")) != 0) continue;
-        const wxFileName fn = get_variant_custom_val<wxVariantDataFileName>(v);
+        if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) continue;
+        const wxRelativeFileName rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+        afn.push_back(rfn.GetFileName());
 
         dataModel->GetValue(v, i, 2);
         if (v.GetType().CmpNoCase(wxS("wxSize")) != 0) continue;
         const wxSize imgSize = get_variant_custom_val<wxVariantDataSize>(v);
 
         dataModel->GetValue(v, i, 3);
-        if (v.GetType().CmpNoCase(wxS("wxSize")) != 0) continue;
-        const wxSize imgResolution = get_variant_custom_val<wxVariantDataSize>(v);
+        if (v.GetType().CmpNoCase(wxS("wxResolutionOrScale")) != 0) continue;
+        const wxResolutionOrScale& ros = get_variant_custom_val<wxVariantDataResolutionOrScale>(v);
+        if (!ros.HasResolution()) continue;
+        const wxSize imgResolution = ros.GetSize();
 
         if (!(is_uninitialized(imgSize) || is_uninitialized(imgResolution))) continue;
 
         wxImage img;
-        if (img.LoadFile(fn.GetFullPath()))
+        if (img.LoadFile(rfn.GetFileName().GetFullPath()))
         {
             const wxSize newImgSize = img.GetSize();
 
@@ -1628,10 +2060,13 @@ wxThread::ExitCode wxMainFrame::Entry()
             vals.push_back(zeroVSize);
         }
 
-        wxScopedPtr<wxThreadEvent> threadEvent(new wxThreadEvent);
-        threadEvent->SetPayload(vals);
-        wxQueueEvent(GetEventHandler(), threadEvent.release());
+        wxQueueEvent(GetEventHandler(), create_thread_event(vals));
     }
+
+    const wxFileName commonDir = find_common_path(afn);
+    wxVector<wxVariant> vals;
+    vals.push_back(wxVariantDataFileName::Get(commonDir));
+    wxQueueEvent(GetEventHandler(), create_thread_event(vals));
 
     return (wxThread::ExitCode)0;
 }

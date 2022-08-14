@@ -35,6 +35,7 @@
 #include <wx/bmpbuttn.h>
 #include <wx/dataview.h>
 #include <wx/collpane.h>
+#include <wx/tglbtn.h>
 #include <wx/frame.h>
 #include <wx/app.h>
 #include <wx/cmdline.h>
@@ -54,6 +55,7 @@
 #include <wx/dcscreen.h>
 #include <wx/wupdlock.h>
 #include <wx/mimetype.h>
+#include <wx/valnum.h>
 
 #include <wx/datectrl.h>
 #include <wx/timectrl.h>
