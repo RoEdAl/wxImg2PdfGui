@@ -70,6 +70,8 @@ class wxMainFrame:
     void OnButtonDelete(wxCommandEvent&);
     void OnUpdateButtonResolutionScale(wxUpdateUIEvent&);
     void OnButtonResolutionScale(wxCommandEvent&);
+    void OnUpdateButtonDocOpen(wxUpdateUIEvent&);
+    void OnButtonDocOpen(wxCommandEvent&);
     void OnButtonClearResolutionScale(wxCommandEvent&);
     void OnChooseDst(wxCommandEvent&);
     void OnCheckShowTimestamps(wxCommandEvent&);

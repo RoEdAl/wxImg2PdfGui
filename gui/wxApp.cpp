@@ -471,6 +471,11 @@ bool wxMyApp::OnInit()
         wxLogWarning(_("mutool tool not found."));
     }
 
+    if (!wxCmdTool::FindLocalTool(wxCmdTool::TOOL_SUMATRA_PDF, m_sumatraPdfPath))
+    {
+        wxLogVerbose(_("SumatraPDF not found."));
+    }
+
     wxFrame* const pFrame = new wxMainFrame();
     pFrame->Show(true);
 
@@ -485,6 +490,33 @@ const wxFileName& wxMyApp::GetScriptPath() const
 const wxFileName& wxMyApp::GetMuToolPath() const
 {
     return m_muToolPath;
+}
+
+bool wxMyApp::SumatraPdfFound() const
+{
+    return m_sumatraPdfPath.IsOk();
+}
+
+const wxFileName& wxMyApp::GetSumatraPdfPath() const
+{
+    return m_sumatraPdfPath;
+}
+
+bool wxMyApp::RunDocViewer(const wxFileName& doc) const
+{
+    wxASSERT(doc.IsDirReadable());
+
+    wxLogMessage(_("Launching viewer for %s"), doc.GetFullName());
+    const wxString cmd = wxString::Format("\"%s\" -new-window -restrict -view \"single page\" \"%s\"", m_sumatraPdfPath.GetFullPath(), doc.GetFullPath());
+    const long pid = wxExecute(cmd);
+    if (pid <= 0)
+    {
+        wxLogWarning(_("Fail to run SumatraPDF viewer"));
+        wxLogVerbose(_("cmd: %s"), cmd);
+        return false;
+    }
+
+    return true;
 }
 
 namespace
@@ -505,5 +537,6 @@ namespace
 void wxMyApp::ShowToolPaths() const
 {
     show_tool_path(m_muToolPath);
+    show_tool_path(m_sumatraPdfPath);
     show_tool_path(m_scriptPath);
 }

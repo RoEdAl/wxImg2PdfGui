@@ -29,6 +29,10 @@ class wxMyApp:
     const wxFileName& GetMuToolPath() const;
     const wxFileName& GetScriptPath() const;
 
+    bool SumatraPdfFound() const;
+    const wxFileName& GetSumatraPdfPath() const;
+    bool RunDocViewer(const wxFileName&) const;
+
     void ShowToolPaths() const;
     bool ShowLogTimestamps(bool showTimestamps = true);
     bool GetFnColumn(const wxRelativeFileName&, wxVector<wxVariant>&) const;
@@ -42,6 +46,7 @@ class wxMyApp:
 
     wxFileName m_scriptPath;
     wxFileName m_muToolPath;
+    wxFileName m_sumatraPdfPath;
     std::unordered_map<wxString, wxBitmapBundle> m_bitmapMap;
     wxIconBundle m_appIcons;
     wxVariant m_null;

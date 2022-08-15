@@ -85,6 +85,7 @@ en.DownloadAbortedByUser=Download aborted by user
 en.ExtractingTitle=Extracting downloaded files…
 en.ExtractingDesc=Extracting %1
 en.ExtractFailed=Fail to extract downloaded package %1
+en.RenameFailed=Fail to rename extracted executable %1
  
 [Code]
 
@@ -181,6 +182,10 @@ begin
 				DownloadPage.SetText(ExpandConstant('{cm:ExtractingTitle}'), ExpandConstant('{cm:ExtractingDesc,SumatraPDF}'));
 				Exec(sevenZip, 'e SumatraPDF-{#SumatraPdfVersion}-64.zip -osumatrapdf -aoa -bso0', extractDir, SW_HIDE, ewWaitUntilTerminated, exeRes);
 				if exeRes <> 0 then RaiseException(ExpandConstant('{cm:ExtractFailed,SumatraPDF'));
+				if not RenameFile(
+					ExpandConstant('{tmp}/sumatrapdf/SumatraPDF-{#SumatraPdfVersion}-64.exe'),
+					ExpandConstant('{tmp}/sumatrapdf/SumatraPDF.exe')
+				) then RaiseException(ExpandConstant('{cm:RenameFailed,SumatraPDF'));
 			end;
 			
 			Result := '';

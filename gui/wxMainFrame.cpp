@@ -426,7 +426,26 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     innerSizer->Add(button, wxSizerFlags().CenterHorizontal());
                 }
 
-                sizer->Add(innerSizer, wxSizerFlags().Top().Border(wxLEFT));
+                if (wxGetApp().SumatraPdfFound())
+                {
+
+                    innerSizer->AddStretchSpacer();
+
+                    {
+                        const wxIconBundle iconBundle("ico_image", nullptr);
+                        wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                        button->SetToolTip(_("SumatraPDF"));
+                        button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDocOpen, this);
+                        button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDocOpen, this);
+                        innerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                    }
+
+                    sizer->Add(innerSizer, wxSizerFlags().Expand().Border(wxLEFT));
+                }
+                else
+                {
+                    sizer->Add(innerSizer, wxSizerFlags().Top().Border(wxLEFT));
+                }
             }
         }
 
@@ -658,13 +677,15 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
     wxLog::EnableLogging();
 
     const wxVersionInfo libVer = wxGetLibraryVersionInfo();
-    wxLogMessage(_("Simple image to PDF converter"));
+    wxLogMessage(_wxS("Simple image to PDF converter"));
+    wxLogMessage(_wxS("Powered by M\u03bcPDF library"));
     wxLogMessage(wxEmptyString);
     wxLogMessage("%-10s: %s", _("Version"), wxGetApp().APP_VERSION);
     wxLogMessage("%-10s: %s", _("Author"), wxGetApp().GetVendorDisplayName());
     wxLogMessage("%-10s: %s", _("OS"), wxPlatformInfo::Get().GetOperatingSystemDescription());
     wxLogMessage("%-10s: %s %s", _("Compiler"), INFO_CXX_COMPILER_ID, INFO_CXX_COMPILER_VERSION);
     wxLogMessage("%-10s: %s", libVer.GetName(), libVer.GetVersionString());
+    wxLogMessage("%-10s: %s", _("Source"), wxS("http://github.com/RoEdAl/wxImg2PdfGui"));
     wxGetApp().ShowToolPaths();
 
     Bind(wxEVT_CLOSE_WINDOW, &wxMainFrame::OnClose, this);
@@ -1492,30 +1513,47 @@ void wxMainFrame::OnUpdateButtonResolutionScale(wxUpdateUIEvent& event)
 
 void wxMainFrame::OnDataViewItemActiveted(wxDataViewEvent& event)
 {
-    if (event.GetColumn() != 3) return;
+    switch (event.GetColumn())
+    {
+        case 0:
+        case 1:
+        if (wxGetApp().SumatraPdfFound())
+        {
+            wxVariant v;
+            m_listViewInputFiles->GetModel()->GetValue(v, event.GetItem(), 1);
+            if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) return;
+            const wxRelativeFileName rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+            wxGetApp().RunDocViewer(rfn.GetFileName());
+        }
+        break;
 
-    wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
-    wxVariant v;
-    dataModel->GetValue(v, event.GetItem(), 3);
-    if (v.GetType().CmpNoCase(wxS("wxResolutionOrScale")) != 0) return;
-    const wxResolutionOrScale& ros = get_variant_custom_val<wxVariantDataResolutionOrScale>(v);
-    if (ros.HasResolution())
-    {
-        wxScopedPtr<SizeDialog> dlg(new SizeDialog(this, wxID_ANY, _("Specify image resolution")));
-        dlg->SetValue(ros.GetSize());
-        const int res = dlg->ShowModal();
-        if (res != wxID_OK) return;
-        const wxSize newRes = dlg->GetValue();
-        dataModel->SetValue(wxVariantDataResolutionOrScale::GetResolution(newRes), event.GetItem(), 3);
-    }
-    else
-    {
-        wxScopedPtr<ScaleDialog> dlg(new ScaleDialog(this, wxID_ANY, _("Specify document scale")));
-        dlg->SetValue(ros.GetSize());
-        const int res = dlg->ShowModal();
-        if (res != wxID_OK) return;
-        const wxSize newScale = dlg->GetValue();
-        dataModel->SetValue(wxVariantDataResolutionOrScale::GetScale(newScale), event.GetItem(), 3);
+        case 3:
+        {
+            wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
+            wxVariant v;
+            dataModel->GetValue(v, event.GetItem(), 3);
+            if (v.GetType().CmpNoCase(wxS("wxResolutionOrScale")) != 0) return;
+            const wxResolutionOrScale& ros = get_variant_custom_val<wxVariantDataResolutionOrScale>(v);
+            if (ros.HasResolution())
+            {
+                wxScopedPtr<SizeDialog> dlg(new SizeDialog(this, wxID_ANY, _("Specify image resolution")));
+                dlg->SetValue(ros.GetSize());
+                const int res = dlg->ShowModal();
+                if (res != wxID_OK) return;
+                const wxSize newRes = dlg->GetValue();
+                dataModel->SetValue(wxVariantDataResolutionOrScale::GetResolution(newRes), event.GetItem(), 3);
+            }
+            else
+            {
+                wxScopedPtr<ScaleDialog> dlg(new ScaleDialog(this, wxID_ANY, _("Specify document scale")));
+                dlg->SetValue(ros.GetSize());
+                const int res = dlg->ShowModal();
+                if (res != wxID_OK) return;
+                const wxSize newScale = dlg->GetValue();
+                dataModel->SetValue(wxVariantDataResolutionOrScale::GetScale(newScale), event.GetItem(), 3);
+            }
+            break;
+        }
     }
 }
 
@@ -1921,4 +1959,38 @@ wxThread::ExitCode wxMainFrame::Entry()
     wxQueueEvent(GetEventHandler(), create_thread_event(vals));
 
     return (wxThread::ExitCode)0;
+}
+
+void wxMainFrame::OnUpdateButtonDocOpen(wxUpdateUIEvent& event)
+{
+    if (!wxGetApp().SumatraPdfFound())
+    {
+        event.Enable(false);
+        return;
+    }
+
+    if (m_listViewInputFiles->GetSelectedItemsCount() == 1)
+    {
+        const wxThread* thread = GetThread();
+        event.Enable(thread == nullptr || !thread->IsAlive());
+    }
+    else
+    {
+        event.Enable(false);
+    }
+}
+
+void wxMainFrame::OnButtonDocOpen(wxCommandEvent& WXUNUSED(event))
+{
+    const wxFileName& sumatraPdf = wxGetApp().GetSumatraPdfPath();
+    if (!sumatraPdf.IsOk()) return;
+
+    const wxDataViewItem selItem = m_listViewInputFiles->GetSelection();
+    if (!selItem.IsOk()) return;
+
+    wxVariant v;
+    m_listViewInputFiles->GetModel()->GetValue(v, selItem, 1);
+    if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) return;
+    const wxRelativeFileName rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+    wxGetApp().RunDocViewer(rfn.GetFileName());
 }
