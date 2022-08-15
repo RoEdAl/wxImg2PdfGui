@@ -92,21 +92,7 @@ SizeDialog::SizeDialog(
     }
 
     {
-        wxStdDialogButtonSizer* const buttonSizer = new wxStdDialogButtonSizer();
-
-        {
-            wxButton* const button = new wxButton(this, wxID_OK);
-            buttonSizer->AddButton(button);
-            button->SetDefault();
-        }
-
-        {
-            wxButton* const button = new wxButton(this, wxID_CANCEL);
-            buttonSizer->AddButton(button);
-        }
-
-        buttonSizer->Realize();
-
+        wxStdDialogButtonSizer* const buttonSizer = CreateStdDialogButtonSizer(wxOK|wxCANCEL);
         sizer->Add(buttonSizer, wxSizerFlags().Border(wxTOP | wxBOTTOM).Right());
     }
 
@@ -213,21 +199,7 @@ ScaleDialog::ScaleDialog(
     }
 
     {
-        wxStdDialogButtonSizer* const buttonSizer = new wxStdDialogButtonSizer();
-
-        {
-            wxButton* const button = new wxButton(this, wxID_OK);
-            buttonSizer->AddButton(button);
-            button->SetDefault();
-        }
-
-        {
-            wxButton* const button = new wxButton(this, wxID_CANCEL);
-            buttonSizer->AddButton(button);
-        }
-
-        buttonSizer->Realize();
-
+        wxStdDialogButtonSizer* const buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
         sizer->Add(buttonSizer, wxSizerFlags().Border(wxTOP | wxBOTTOM).Right());
     }
 
