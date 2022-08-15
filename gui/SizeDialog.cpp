@@ -11,7 +11,7 @@ namespace
         return new wxStaticLine(parent, wxID_ANY, wxDefaultPosition, wxSize(0, parent->FromDIP(1)), wxLI_HORIZONTAL);
     }
 
-    wxSizerFlags get_horizontal_static_line_sizer_flags(wxWindow* wnd)
+    wxSizerFlags get_horizontal_static_line_sizer_flags()
     {
         return wxSizerFlags().Expand().Border(wxLEFT|wxRIGHT|wxTOP);
     }
@@ -88,7 +88,7 @@ SizeDialog::SizeDialog(
 
     {
         wxStaticLine* const staticLine = create_horizontal_static_line(this);
-        sizer->Add(staticLine, get_horizontal_static_line_sizer_flags(this));
+        sizer->Add(staticLine, get_horizontal_static_line_sizer_flags());
     }
 
     {
@@ -195,7 +195,7 @@ ScaleDialog::ScaleDialog(
 
     {
         wxStaticLine* const staticLine = create_horizontal_static_line(this);
-        sizer->Add(staticLine, get_horizontal_static_line_sizer_flags(this));
+        sizer->Add(staticLine, get_horizontal_static_line_sizer_flags());
     }
 
     {

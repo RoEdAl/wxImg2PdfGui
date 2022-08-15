@@ -12,14 +12,16 @@
 #include "VariantExt.h"
 #endif
 
+#ifndef _DATE_TIME_PICKER_H_
 #include "DateTimePicker.h"
+#endif
 
 class wxMainFrame:
     public wxFrame, wxThreadHelper
 {
     wxDECLARE_NO_COPY_CLASS(wxMainFrame);
 
-    typedef wxVector<wxFileName> wxArrayFileName;
+    typedef std::vector<wxFileName> wxArrayFileName;
 
     protected:
 

@@ -493,11 +493,11 @@ namespace
     {
         if (tool.IsOk() && tool.IsAbsolute())
         {
-            wxLogMessage(_("[tool] %-15s: %s"), tool.GetName(), tool.GetFullPath());
+            wxLogMessage("%-10s: %s", tool.GetName(), tool.GetFullPath());
         }
         else
         {
-            wxLogMessage(_("[tool] %-15s: <not found>"), tool.GetName());
+            wxLogMessage(_("%-10s: <not found>"), tool.GetName());
         }
     }
 }

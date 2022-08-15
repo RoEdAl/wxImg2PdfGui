@@ -12,7 +12,6 @@ namespace
 {
     const int AUTO_SCROLL_UPDATE_INTERVAL = 2000;
     const int TIMER_IDLE_WAKE_UP_INTERVAL = 250;
-    const int TIMER_LAYOUT = 2000;
 
     template<typename T>
     const T* get_variant_data(const wxVariant& v)
@@ -292,81 +291,6 @@ namespace
         }
     };
 
-    class ToggleButtonUiUpdater
-    {
-        public:
-
-        ToggleButtonUiUpdater(const wxToggleButton* const toggleButton)
-            : m_toggleButton(toggleButton)
-        {
-        }
-
-        ToggleButtonUiUpdater(const ToggleButtonUiUpdater& uiUpdater)
-            : m_toggleButton(uiUpdater.m_toggleButton)
-        {
-        }
-
-        void operator ()(wxUpdateUIEvent& event) const
-        {
-            event.Enable(m_toggleButton->GetValue());
-        }
-
-        bool operator !=(const ToggleButtonUiUpdater& uiUpdater) const
-        {
-            return m_toggleButton != uiUpdater.m_toggleButton;
-        }
-
-        bool operator ==(const ToggleButtonUiUpdater& uiUpdater) const
-        {
-            return m_toggleButton == uiUpdater.m_toggleButton;
-        }
-
-        private:
-
-        const wxToggleButton* const m_toggleButton;
-    };
-
-    class CheckBoxAndToggleButtonUiUpdater
-    {
-        public:
-
-        CheckBoxAndToggleButtonUiUpdater(const wxCheckBox* const checkBox, const wxToggleButton* const toggleButton)
-            : m_checkBox(checkBox),m_toggleButton(toggleButton)
-        {
-        }
-
-        CheckBoxAndToggleButtonUiUpdater(const CheckBoxAndToggleButtonUiUpdater& uiUpdater)
-            : m_checkBox(uiUpdater.m_checkBox), m_toggleButton(uiUpdater.m_toggleButton)
-        {
-        }
-
-        void operator ()(wxUpdateUIEvent& event) const
-        {
-            event.Enable(is_checked() && m_toggleButton->IsEnabled() && !m_toggleButton->GetValue());
-        }
-
-        bool operator !=(const CheckBoxAndToggleButtonUiUpdater& uiUpdater) const
-        {
-            return m_checkBox != uiUpdater.m_checkBox || m_toggleButton != uiUpdater.m_toggleButton;
-        }
-
-        bool operator ==(const CheckBoxAndToggleButtonUiUpdater& uiUpdater) const
-        {
-            return m_checkBox == uiUpdater.m_checkBox && m_toggleButton == uiUpdater.m_toggleButton;
-        }
-
-        private:
-
-        const wxCheckBox* const m_checkBox;
-        const wxToggleButton* const m_toggleButton;
-
-        bool is_checked() const
-        {
-            if (m_checkBox->Is3State()) return (m_checkBox->Get3StateValue() == wxCHK_CHECKED || m_checkBox->Get3StateValue() == wxCHK_UNDETERMINED);
-            else return m_checkBox->GetValue();
-        }
-    };
-
     class DropTarget:
         public wxFileDropTarget
     {
@@ -378,7 +302,7 @@ namespace
 
         virtual bool OnDropFiles(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), const wxArrayString& filenames)
         {
-            wxBusyCursor busy;
+            const wxBusyCursor busy;
             m_pMainFrame->OnDropFiles(filenames);
             return true;
         }
@@ -401,7 +325,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                 wxBoxSizer* const innerSizer = new wxBoxSizer(wxVERTICAL);
 
                 {
-                    m_listViewInputFiles = new wxDataViewListCtrl(sizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_VERT_RULES | wxDV_MULTIPLE | wxDV_ROW_LINES);
+                    m_listViewInputFiles = new wxDataViewListCtrl(sizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_VERT_RULES | wxDV_MULTIPLE | wxDV_ROW_LINES| wxBORDER_THEME);
 
                     wxDataViewBitmapRenderer* const bitmapRenderer = new wxDataViewBitmapRenderer(wxS("wxBitmapBundle"));
                     wxDataViewColumn* const iconColumn = new wxDataViewColumn(wxS("#"), bitmapRenderer, 0, wxCOL_WIDTH_AUTOSIZE);
@@ -451,7 +375,6 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     m_staticTextCommonDir->SetFont(toolFont);
                     m_staticTextCommonDir->SetToolTip(_("Common directory"));
                     m_staticTextCommonDir->Hide();
-
                     hinnerSizer->Add(m_staticTextCommonDir, wxSizerFlags().CenterVertical());
 
                     innerSizer->Add(hinnerSizer, wxSizerFlags().Expand().Border(wxTOP));
@@ -656,8 +579,9 @@ wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook, const wxFont& 
         wxBoxSizer* const sizer = new wxBoxSizer(wxHORIZONTAL);
 
         {
-            wxCheckBox* const checkBox = create_checkbox(panel, _("Verbose mode"), wxLog::GetVerbose());
+            wxCheckBox* const checkBox = create_checkbox(panel, _("Verbose"), wxLog::GetVerbose());
             checkBox->SetFont(toolFont);
+            checkBox->SetToolTip(_T("Be more verbose"));
             checkBox->Bind(wxEVT_CHECKBOX, &wxMainFrame::OnCheckVerbose, this);
             sizer->Add(checkBox, wxSizerFlags().CenterVertical());
         }
@@ -699,7 +623,7 @@ wxBoxSizer* wxMainFrame::create_bottom_ctrls(const wxFont& toolFont)
 
     {
         wxButton* const button = new wxButton(this, wxID_ANY, m_execButtonCaptionRun);
-        button->SetFont(wxFont(wxNORMAL_FONT->GetPointSize() + 1, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+        button->SetFont(wxFont(wxNORMAL_FONT->GetPointSize() + 1, wxNORMAL_FONT->GetFamily(), wxNORMAL_FONT->GetStyle(), wxFONTWEIGHT_BOLD));
         button->SetToolTip(_("Execute (or kill) mutool utility"));
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonRun, this);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnExecMuTool, this);
@@ -722,11 +646,9 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
     SetIcons(wxGetApp().GetAppIcon());
 
     {
-        const wxFont toolFont(wxSMALL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-
         wxBoxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
-        sizer->Add(m_notebook = create_notebook(toolFont), wxSizerFlags().Proportion(1).Expand());
-        sizer->Add(create_bottom_ctrls(toolFont), wxSizerFlags().Border().Expand());
+        sizer->Add(m_notebook = create_notebook(*wxSMALL_FONT), wxSizerFlags().Proportion(1).Expand());
+        sizer->Add(create_bottom_ctrls(*wxSMALL_FONT), wxSizerFlags().Border().Expand());
         this->SetSizerAndFit(sizer);
     }
 
@@ -735,21 +657,19 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
     wxLog::DisableTimestamp();
     wxLog::EnableLogging();
 
-    wxLogInfo(_("Simple image to PDF converter"));
-    wxLogInfo(_("Version: %s"), wxGetApp().APP_VERSION);
-    wxLogInfo(_("Author: %s"), wxGetApp().GetVendorDisplayName());
-    wxLogInfo(_("Operating system: %s"), wxPlatformInfo::Get().GetOperatingSystemDescription());
-    wxLogInfo(_("Compiler: %s %s"), INFO_CXX_COMPILER_ID, INFO_CXX_COMPILER_VERSION);
-    wxLogInfo(_("Compiled on: %s %s (%s)"), INFO_HOST_SYSTEM_NAME, INFO_HOST_SYSTEM_VERSION, INFO_HOST_SYSTEM_PROCESSOR);
-
+    const wxVersionInfo libVer = wxGetLibraryVersionInfo();
+    wxLogMessage(_("Simple image to PDF converter"));
+    wxLogMessage(wxEmptyString);
+    wxLogMessage("%-10s: %s", _("Version"), wxGetApp().APP_VERSION);
+    wxLogMessage("%-10s: %s", _("Author"), wxGetApp().GetVendorDisplayName());
+    wxLogMessage("%-10s: %s", _("OS"), wxPlatformInfo::Get().GetOperatingSystemDescription());
+    wxLogMessage("%-10s: %s %s", _("Compiler"), INFO_CXX_COMPILER_ID, INFO_CXX_COMPILER_VERSION);
+    wxLogMessage("%-10s: %s", libVer.GetName(), libVer.GetVersionString());
     wxGetApp().ShowToolPaths();
 
     Bind(wxEVT_CLOSE_WINDOW, &wxMainFrame::OnClose, this);
-
     m_timerIdleWakeUp.Bind(wxEVT_TIMER, &wxMainFrame::OnIdleWakeupTimer, this);
-    
     Bind(wxEVT_THREAD, &wxMainFrame::OnItemUpdated, this);
-
     SetDropTarget(new DropTarget(this));
 }
 
@@ -891,7 +811,7 @@ void wxMainFrame::OnUpdateButtonRun(wxUpdateUIEvent& event)
     }
 
     event.SetText(m_execButtonCaptionRun);
-    if (m_listBoxMessages->IsEmpty())
+    if (m_listViewInputFiles->GetItemCount() == 0)
     {
         event.Enable(false);
         return;

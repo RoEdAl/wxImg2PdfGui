@@ -7,8 +7,6 @@
 
 #include <StdWx.h>
 
-#include <wx/artprov.h>
-#include <wx/xrc/xmlres.h>
 #include <wx/intl.h>
 #include <wx/string.h>
 #include <wx/listbox.h>
@@ -24,8 +22,6 @@
 #include <wx/statbox.h>
 #include <wx/combobox.h>
 #include <wx/textctrl.h>
-#include <wx/gbsizer.h>
-#include <wx/wrapsizer.h>
 #include <wx/panel.h>
 #include <wx/checkbox.h>
 #include <wx/stattext.h>
@@ -34,7 +30,6 @@
 #include <wx/notebook.h>
 #include <wx/bmpbuttn.h>
 #include <wx/dataview.h>
-#include <wx/collpane.h>
 #include <wx/tglbtn.h>
 #include <wx/spinctrl.h>
 #include <wx/frame.h>
@@ -49,7 +44,6 @@
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 #include <wx/filedlg.h>
-#include <wx/dirdlg.h>
 #include <wx/dnd.h>
 #include <wx/regex.h>
 #include <wx/mstream.h>
@@ -65,10 +59,10 @@
 #include <wx/thread.h>
 #include <wx/display.h>
 
-#include <wxEncodingDetection/wxTextOutputStreamOnString.h>
 #include <FmtSpec.h>
 #include <wxJson.h>
 
+#include <vector>
 #include <unordered_map>
 
 extern "C" {
@@ -91,4 +85,3 @@ extern "C" {
 }
 
 #endif  // _STD_WX_H
-

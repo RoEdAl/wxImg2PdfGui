@@ -2,7 +2,8 @@
  * DateTimePicker.h
  */
  
-#pragma once
+#ifndef _DATE_TIME_PICKER_H_
+#define _DATE_TIME_PICKER_H_
 
 class DateTimePicker:public wxControl
 {
@@ -28,3 +29,5 @@ class DateTimePicker:public wxControl
     wxDatePickerCtrl* m_datePicker;
     wxTimePickerCtrl* m_timePicker;
 };
+
+#endif
