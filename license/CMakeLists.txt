@@ -22,6 +22,7 @@ ADD_CUSTOM_COMMAND(
 		--template ${LICENSE_FILE_TEMPLATE}
 		-s
 		-t rtf
+		-M lang:en-US
 		-o ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/license.rtf
 	COMMENT "Creating license file [RTF]"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -34,6 +35,7 @@ ADD_CUSTOM_COMMAND(
 		-i ${LICENSE_FILE}
 		-s
 		-t plain+smart
+		-M lang:en-US
 		-o ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/license.txt
 	COMMENT "Creating license file [TXT]"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
