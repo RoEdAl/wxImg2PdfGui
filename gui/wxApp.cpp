@@ -325,6 +325,11 @@ void wxMyApp::fill_icon_map()
         iconMap["png"] = icoImg;
     }
 
+    if (!add_icons_for_ext("svg", iconMap))
+    {
+        iconMap["svg"] = icoImg;
+    }
+
     if (add_icons_for_ext("pdf", iconMap))
     {
         m_appIcons = iconMap["pdf"];

@@ -36,6 +36,7 @@
 #include <wx/dataview.h>
 #include <wx/collpane.h>
 #include <wx/tglbtn.h>
+#include <wx/spinctrl.h>
 #include <wx/frame.h>
 #include <wx/app.h>
 #include <wx/cmdline.h>
@@ -62,6 +63,7 @@
 
 #include <wx/wfstream.h>
 #include <wx/thread.h>
+#include <wx/display.h>
 
 #include <wxEncodingDetection/wxTextOutputStreamOnString.h>
 #include <FmtSpec.h>

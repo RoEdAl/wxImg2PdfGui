@@ -536,28 +536,27 @@ class wxVariantDataResolutionOrScale: public wxVariantData
             }
             else if (sz.x == sz.y)
             {
-                str << sz.x;
+                str << sz.x << wxS("\u200Adpi");
             }
             else
             {
-                str << sz.x << wxS('\u00D7') << sz.y;
+                str << sz.x << wxS('\u00D7') << sz.y << wxS("\u200Adpi");
             }
         }
         else
         {
-            float sx, sy;
-            m_resolutionOrScale.GetScale(sx, sy);
-            if (sx <= 0.0f || sy <= 0.0f)
+            const wxSize& sz = m_resolutionOrScale.GetSize();
+            if (sz.x <= 0 || sz.y <= 0)
             {
                 str.Empty();
             }
-            else if (sx == sy)
+            else if (sz.x == sz.y)
             {
-                str << sx;
+                str << sz.x << wxS("\u200A%");
             }
             else
             {
-                str << sx << wxS('\u00D7') << sy;
+                str << sz.x << wxS('\u00D7') << sz.y << wxS("\u200A%");
             }
         }
         return true;

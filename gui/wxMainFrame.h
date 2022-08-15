@@ -12,6 +12,8 @@
 #include "VariantExt.h"
 #endif
 
+#include "DateTimePicker.h"
+
 class wxMainFrame:
     public wxFrame, wxThreadHelper
 {
@@ -25,8 +27,6 @@ class wxMainFrame:
     wxSizer* m_sizerInputFiles;
     wxDataViewListCtrl* m_listViewInputFiles;
     wxStaticText* m_staticTextCommonDir;
-    wxCheckBox* m_checkBoxVerbose;
-    wxCheckBox* m_checkBoxSwitchToMessagesPane;
     wxTextCtrl* m_textCtrlDst;
     wxCheckBox* m_checkBoxOutputDecompress;
     wxCheckBox* m_checkBoxOutputCompressFonts;
@@ -44,12 +44,9 @@ class wxMainFrame:
     wxCheckBox* m_checkBoxMetadataCreator;
     wxTextCtrl* m_textCtrlMetadataCreator;
     wxCheckBox* m_checkBoxMetadataCreationDate;
-    wxDatePickerCtrl* m_datePickerMetadataCreationDate;
-    wxTimePickerCtrl* m_timePickerMetadataCreationDate;
+    DateTimePicker* m_dateTimePickerMetadataCreationDate;
     wxCheckBox* m_checkBoxMetadataModDate;
-    wxDatePickerCtrl* m_datePickerMetadataModDate;
-    wxTimePickerCtrl* m_timePickerMetadataModDate;
-    wxCheckBox* m_checkBoxShowTimestamps;
+    DateTimePicker* m_dateTimePickerMetadataModDate;
     ListBox* m_listBoxMessages;
 
     protected:
@@ -57,12 +54,10 @@ class wxMainFrame:
     void OnClose(wxCloseEvent&);
     void OnIdle(wxIdleEvent&);
     void OnIdleWakeupTimer(wxTimerEvent&);
-    void OnAutoScrollTimer(wxTimerEvent&);
     void OnProcessTerminated(wxProcessEvent&);
 #ifdef __WXMSW__
     void OnTaskKillProcessTerminated(wxProcessEvent&);
 #endif
-    void OnUpdateMsgCnt(wxUpdateUIEvent&);
     void OnUpdateRunUiCtrl(wxUpdateUIEvent&);
     void OnCheckVerbose(wxCommandEvent&);
     void OnUpdateButtonRun(wxUpdateUIEvent&);
@@ -75,19 +70,19 @@ class wxMainFrame:
     void OnButtonResolutionScale(wxCommandEvent&);
     void OnButtonClearResolutionScale(wxCommandEvent&);
     void OnChooseDst(wxCommandEvent&);
-    void OnCheckAutoScroll(wxCommandEvent&);
     void OnCheckShowTimestamps(wxCommandEvent&);
     void OnUpdateMsgCtrls(wxUpdateUIEvent&);
     void OnCopyEvents(wxCommandEvent&);
     void OnItemUpdated(wxThreadEvent&);
+    void OnDataViewItemActiveted(wxDataViewEvent&);
 
     private:
 
-    wxPanel* create_src_dst_pannel(wxNotebook*, const wxFont&, const wxFont&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&);
-    wxPanel* create_metadata_pannel(wxNotebook*, const wxFont&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&);
-    wxPanel* create_messages_panel(wxNotebook*, const wxFont&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&);
-    wxNotebook* create_notebook(const wxFont&, const wxFont&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&);
-    wxBoxSizer* create_bottom_ctrls(const wxFont&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&, const wxSizerFlags&);
+    wxPanel* create_src_dst_pannel(wxNotebook*, const wxFont&);
+    wxPanel* create_metadata_pannel(wxNotebook*);
+    wxPanel* create_messages_panel(wxNotebook*, const wxFont&);
+    wxNotebook* create_notebook(const wxFont&);
+    wxBoxSizer* create_bottom_ctrls(const wxFont&);
 
     private:
 
@@ -107,7 +102,6 @@ class wxMainFrame:
     private:
 
     wxScopedPtr<wxLog> m_pLog;
-    wxScopedPtr<wxLog> m_pNoScrollLog;
     wxLog* m_pPrevLog;
 
     wxArrayFileName m_temporaryFiles;
@@ -117,7 +111,6 @@ class wxMainFrame:
 #endif
 
     wxTimer m_timerIdleWakeUp;
-    wxTimer m_timerAutoScroll;
 
     wxString m_execButtonCaptionRun;
     wxString m_execButtonCaptionKill;

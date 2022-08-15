@@ -14,6 +14,7 @@ SET(IMG2PDF_GUI_SOURCE_FILES
 	LogListBox.cpp
 	VariantExt.cpp
 	SizeDialog.cpp
+	DateTimePicker.cpp
 )
 
 ADD_EXECUTABLE(wxImg2PdfGui WIN32
