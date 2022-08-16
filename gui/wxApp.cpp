@@ -502,13 +502,30 @@ const wxFileName& wxMyApp::GetSumatraPdfPath() const
     return m_sumatraPdfPath;
 }
 
+namespace
+{
+    wxString get_short_path_if_possible(const wxFileName& fn)
+    {
+        const wxString res = fn.GetShortPath();
+        return res.IsEmpty() ? fn.GetFullPath() : res;
+    }
+}
+
 bool wxMyApp::RunDocViewer(const wxFileName& doc) const
 {
     wxASSERT(doc.IsDirReadable());
 
+    const wxString sumatraPdfPath = get_short_path_if_possible(m_sumatraPdfPath);
+
     wxLogMessage(_("Launching viewer for %s"), doc.GetFullName());
-    const wxString cmd = wxString::Format("\"%s\" -new-window -restrict -view \"single page\" \"%s\"", m_sumatraPdfPath.GetFullPath(), doc.GetFullPath());
-    const long pid = wxExecute(cmd);
+    const wxString cmd = wxString::Format("\"%s\" -new-window -restrict -view \"single page\" \"%s\"", 
+                                          sumatraPdfPath,
+                                          doc.GetFullPath());
+
+    wxExecuteEnv env;
+    env.cwd = m_sumatraPdfPath.GetPath();
+
+    const long pid = wxExecute(cmd, 0, nullptr, &env);
     if (pid <= 0)
     {
         wxLogWarning(_("Fail to run SumatraPDF viewer"));

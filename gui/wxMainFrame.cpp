@@ -130,7 +130,7 @@ namespace
 
     wxStaticText* create_static_text(wxWindow* parent)
     {
-        return new wxStaticText(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT | wxST_ELLIPSIZE_MIDDLE);
+        return new wxStaticText(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT | wxST_ELLIPSIZE_MIDDLE| wxST_NO_AUTORESIZE);
     }
 
     wxStaticText* create_static_text(const wxStaticBoxSizer* parentSizer)
@@ -322,10 +322,12 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
         wxStaticBoxSizer* const sizer = create_static_box_sizer(panel, _("Sources"), wxHORIZONTAL);
         {
             {
-                wxBoxSizer* const innerSizer = new wxBoxSizer(wxVERTICAL);
+                wxFlexGridSizer* const innerSizer = new wxFlexGridSizer(2);
+                innerSizer->AddGrowableCol(0);
+                innerSizer->AddGrowableRow(0);
 
                 {
-                    m_listViewInputFiles = new wxDataViewListCtrl(sizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_VERT_RULES | wxDV_MULTIPLE | wxDV_ROW_LINES| wxBORDER_THEME);
+                    m_listViewInputFiles = new wxDataViewListCtrl(sizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_VERT_RULES | wxDV_MULTIPLE | wxDV_ROW_LINES | wxBORDER_THEME);
 
                     wxDataViewBitmapRenderer* const bitmapRenderer = new wxDataViewBitmapRenderer(wxS("wxBitmapBundle"));
                     wxDataViewColumn* const iconColumn = new wxDataViewColumn(wxS("#"), bitmapRenderer, 0, wxCOL_WIDTH_AUTOSIZE);
@@ -370,86 +372,80 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                 }
 
                 {
-                    wxBoxSizer* const hinnerSizer = new wxBoxSizer(wxHORIZONTAL);
-                    m_staticTextCommonDir = create_static_text(panel);
-                    m_staticTextCommonDir->SetFont(toolFont);
-                    m_staticTextCommonDir->SetToolTip(_("Common directory"));
-                    m_staticTextCommonDir->Hide();
-                    hinnerSizer->Add(m_staticTextCommonDir, wxSizerFlags().CenterVertical());
-
-                    innerSizer->Add(hinnerSizer, wxSizerFlags().Expand().Border(wxTOP));
-                }
-
-                sizer->Add(innerSizer, wxSizerFlags().Expand().Proportion(1));
-                m_sizerInputFiles = innerSizer;
-            }
-
-            {
-                wxBoxSizer* const innerSizer = new wxBoxSizer(wxVERTICAL);
-
-                {
-                    const wxIconBundle iconBundle("ico_add", nullptr);
-                    wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
-                    button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonAdd, this);
-                    button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonAdd, this);
-                    innerSizer->Add(button, wxSizerFlags().CentreHorizontal());
-                }
-
-                {
-                    const wxIconBundle iconBundle("ico_remove", nullptr);
-                    wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
-                    button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDelete, this);
-                    button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDelete, this);
-                    innerSizer->Add(button, wxSizerFlags().CenterHorizontal());
-                }
-
-                {
-                    wxStaticLine* const staticLine = create_horizontal_static_line(sizer->GetStaticBox());
-                    innerSizer->Add(staticLine, get_horizontal_static_line_sizer_flags(sizer->GetStaticBox()));
-                }
-
-                {
-                    const wxIconBundle iconBundle("ico_acpect_ratio", nullptr);
-                    wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
-                    button->SetToolTip(_("Change resolution/Scale"));
-                    button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
-                    button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonResolutionScale, this);
-                    innerSizer->Add(button, wxSizerFlags().CenterHorizontal());
-                }
-
-                {
-                    const wxIconBundle iconBundle("ico_clear", nullptr);
-                    wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
-                    button->SetToolTip(_("Use original image resolution/Do not scale image"));
-                    button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
-                    button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonClearResolutionScale, this);
-                    innerSizer->Add(button, wxSizerFlags().CenterHorizontal());
-                }
-
-                if (wxGetApp().SumatraPdfFound())
-                {
-
-                    innerSizer->AddStretchSpacer();
+                    wxBoxSizer* const vinnerSizer = new wxBoxSizer(wxVERTICAL);
 
                     {
-                        const wxIconBundle iconBundle("ico_image", nullptr);
+                        const wxIconBundle iconBundle("ico_add", nullptr);
                         wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
-                        button->SetToolTip(_("SumatraPDF"));
-                        button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDocOpen, this);
-                        button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDocOpen, this);
-                        innerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                        button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonAdd, this);
+                        button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonAdd, this);
+                        vinnerSizer->Add(button, wxSizerFlags().CentreHorizontal());
                     }
 
-                    sizer->Add(innerSizer, wxSizerFlags().Expand().Border(wxLEFT));
-                }
-                else
-                {
-                    sizer->Add(innerSizer, wxSizerFlags().Top().Border(wxLEFT));
-                }
-            }
-        }
+                    {
+                        const wxIconBundle iconBundle("ico_remove", nullptr);
+                        wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                        button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDelete, this);
+                        button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDelete, this);
+                        vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                    }
 
-        panelSizer->Add(sizer, wxSizerFlags().Expand().Proportion(1));
+                    {
+                        wxStaticLine* const staticLine = create_horizontal_static_line(sizer->GetStaticBox());
+                        vinnerSizer->Add(staticLine, get_horizontal_static_line_sizer_flags(sizer->GetStaticBox()));
+                    }
+
+                    {
+                        const wxIconBundle iconBundle("ico_acpect_ratio", nullptr);
+                        wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                        button->SetToolTip(_("Change resolution/Scale"));
+                        button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
+                        button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonResolutionScale, this);
+                        vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                    }
+
+                    {
+                        const wxIconBundle iconBundle("ico_clear", nullptr);
+                        wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                        button->SetToolTip(_("Use original image resolution/Do not scale image"));
+                        button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
+                        button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonClearResolutionScale, this);
+                        vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                    }
+
+                    if (wxGetApp().SumatraPdfFound())
+                    {
+
+                        vinnerSizer->AddStretchSpacer();
+
+                        {
+                            const wxIconBundle iconBundle("ico_image", nullptr);
+                            wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                            button->SetToolTip(_("Launch document viewer"));
+                            button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDocOpen, this);
+                            button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDocOpen, this);
+                            vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                        }
+
+                        innerSizer->Add(vinnerSizer, wxSizerFlags().Expand().Border(wxLEFT));
+                    }
+                    else
+                    {
+                        innerSizer->Add(vinnerSizer, wxSizerFlags().Top().Border(wxLEFT));
+                    }
+                }
+
+                m_staticTextCommonDir = create_static_text(panel);
+                m_staticTextCommonDir->SetFont(toolFont);
+                m_staticTextCommonDir->SetToolTip(_("Common directory"));
+                m_staticTextCommonDir->Hide();
+                innerSizer->Add(m_staticTextCommonDir, wxSizerFlags().Expand().Border(wxTOP).ReserveSpaceEvenIfHidden());
+
+                sizer->Add(innerSizer, wxSizerFlags().Expand().Proportion(1));
+            }
+
+            panelSizer->Add(sizer, wxSizerFlags().Expand().Proportion(1));
+        }
     }
 
     {
@@ -474,20 +470,10 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
         {
             wxFlexGridSizer* const innerSizer = new wxFlexGridSizer(4);
 
-            m_checkBoxOutputDecompress = create_checkbox(sizer, _T("Decompress"));
-            m_checkBoxOutputDecompress->SetFont(toolFont);
-            m_checkBoxOutputDecompress->SetToolTip(_T("Decompress all streams"));
-            innerSizer->Add(m_checkBoxOutputDecompress);
-
             m_checkBoxOutputCompressFonts = create_checkbox(sizer, _T("Compress fonts"), true);
             m_checkBoxOutputCompressFonts->SetFont(toolFont);
             m_checkBoxOutputCompressFonts->SetToolTip(_T("Compress fonts"));
             innerSizer->Add(m_checkBoxOutputCompressFonts);
-
-            m_checkBoxOutputAscii = create_checkbox(sizer, _T("ASCII"));
-            m_checkBoxOutputAscii->SetFont(toolFont);
-            m_checkBoxOutputAscii->SetToolTip(_T("ASCII hex encode binary streams"));
-            innerSizer->Add(m_checkBoxOutputAscii);
 
             m_checkBoxOutputPretty = create_checkbox(sizer, _T("Pretty"), true);
             m_checkBoxOutputPretty->SetFont(toolFont);
@@ -508,6 +494,16 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
             m_checkBoxOutputLinearize->SetFont(toolFont);
             m_checkBoxOutputLinearize->SetToolTip(_T("Optimize for web browsers"));
             innerSizer->Add(m_checkBoxOutputLinearize);
+
+            m_checkBoxOutputDecompress = create_checkbox(sizer, _T("Decompress"));
+            m_checkBoxOutputDecompress->SetFont(toolFont);
+            m_checkBoxOutputDecompress->SetToolTip(_T("Decompress all streams"));
+            innerSizer->Add(m_checkBoxOutputDecompress);
+
+            m_checkBoxOutputAscii = create_checkbox(sizer, _T("ASCII"));
+            m_checkBoxOutputAscii->SetFont(toolFont);
+            m_checkBoxOutputAscii->SetToolTip(_T("ASCII hex encode binary streams"));
+            innerSizer->Add(m_checkBoxOutputAscii);
 
             sizer->Add(innerSizer, wxSizerFlags().Border(wxTOP));
         }
@@ -676,16 +672,23 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
     wxLog::DisableTimestamp();
     wxLog::EnableLogging();
 
-    const wxVersionInfo libVer = wxGetLibraryVersionInfo();
-    wxLogMessage(_wxS("Simple image to PDF converter"));
-    wxLogMessage(_wxS("Powered by M\u03bcPDF library"));
-    wxLogMessage(wxEmptyString);
-    wxLogMessage("%-10s: %s", _("Version"), wxGetApp().APP_VERSION);
-    wxLogMessage("%-10s: %s", _("Author"), wxGetApp().GetVendorDisplayName());
-    wxLogMessage("%-10s: %s", _("OS"), wxPlatformInfo::Get().GetOperatingSystemDescription());
-    wxLogMessage("%-10s: %s %s", _("Compiler"), INFO_CXX_COMPILER_ID, INFO_CXX_COMPILER_VERSION);
-    wxLogMessage("%-10s: %s", libVer.GetName(), libVer.GetVersionString());
-    wxLogMessage("%-10s: %s", _("Source"), wxS("http://github.com/RoEdAl/wxImg2PdfGui"));
+    {
+        const wxVersionInfo libVer = wxGetLibraryVersionInfo();
+        const wxJson jsonInfo = wxJson::meta();
+        wxLogMessage(_wxS("Simple image to PDF converter"));
+        wxLogMessage(_wxS("Powered by M\u03bcPDF library"));
+        wxLogMessage(wxEmptyString);
+        wxLogMessage("%-10s: %s", _("Version"), wxGetApp().APP_VERSION);
+        wxLogMessage("%-10s: %s", _("Author"), wxGetApp().GetVendorDisplayName());
+        wxLogMessage("%-10s: %s", _("OS"), wxPlatformInfo::Get().GetOperatingSystemDescription());
+        wxLogMessage("%-10s: %s %s", _("Compiler"), INFO_CXX_COMPILER_ID, INFO_CXX_COMPILER_VERSION);
+        wxLogMessage("%-10s: %s %s", libVer.GetName(), libVer.GetVersionString(), libVer.GetCopyright());
+        wxLogMessage("%-10s: %s %s %s", wxS("JSON"),
+                     wxString(jsonInfo["name"].get<std::string>()),
+                     wxString(jsonInfo["version"]["string"].get<std::string>()),
+                     wxString(jsonInfo["copyright"].get<std::string>()));
+        wxLogMessage("%-10s: %s", _("Source"), wxS("http://github.com/RoEdAl/wxImg2PdfGui"));
+    }
     wxGetApp().ShowToolPaths();
 
     Bind(wxEVT_CLOSE_WINDOW, &wxMainFrame::OnClose, this);
@@ -1764,7 +1767,7 @@ void wxMainFrame::OnItemUpdated(wxThreadEvent& event)
 
             if (m_commonDir->GetFileName().IsOk())
             {
-                m_staticTextCommonDir->SetLabel(m_commonDir->GetFileName().GetFullPath());
+                m_staticTextCommonDir->SetLabel(m_commonDir->GetFileName().GetFullPath().RemoveLast());
                 m_staticTextCommonDir->Show();
             }
             else
@@ -1772,7 +1775,6 @@ void wxMainFrame::OnItemUpdated(wxThreadEvent& event)
                 m_staticTextCommonDir->SetLabel(wxEmptyString);
                 m_staticTextCommonDir->Show(false);
             }
-            m_sizerInputFiles->Layout();
             break;
         }
 

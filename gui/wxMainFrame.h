@@ -26,7 +26,6 @@ class wxMainFrame:
     protected:
 
     wxNotebook* m_notebook;
-    wxSizer* m_sizerInputFiles;
     wxDataViewListCtrl* m_listViewInputFiles;
     wxStaticText* m_staticTextCommonDir;
     wxTextCtrl* m_textCtrlDst;
