@@ -682,7 +682,7 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
         wxLogMessage("%-10s: %s", _("Author"), wxGetApp().GetVendorDisplayName());
         wxLogMessage("%-10s: %s", _("OS"), wxPlatformInfo::Get().GetOperatingSystemDescription());
         wxLogMessage("%-10s: %s %s", _("Compiler"), INFO_CXX_COMPILER_ID, INFO_CXX_COMPILER_VERSION);
-        wxLogMessage("%-10s: %s %s", libVer.GetName(), libVer.GetVersionString(), libVer.GetCopyright());
+        wxLogMessage("%-10s: %s %s", _("GUI"), libVer.GetVersionString(), libVer.GetCopyright());
         wxLogMessage("%-10s: %s %s %s", wxS("JSON"),
                      wxString(jsonInfo["name"].get<std::string>()),
                      wxString(jsonInfo["version"]["string"].get<std::string>()),
