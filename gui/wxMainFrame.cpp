@@ -110,9 +110,36 @@ namespace
         return new wxBitmapButton(parentSizer->GetStaticBox(), wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle));
     }
 
+    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxString& resName)
+    {
+        wxIconBundle iconBundle;
+        if (wxGetApp().LoadMaterialDesignIcon(resName, iconBundle))
+        {
+            return create_bitmap_button(parentSizer, iconBundle);
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+
+
     wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxIconBundle& iconBundle)
     {
         return new wxBitmapButton(parent, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle));
+    }
+
+    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxString& resName)
+    {
+        wxIconBundle iconBundle;
+        if (wxGetApp().LoadMaterialDesignIcon(resName, iconBundle))
+        {
+            return create_bitmap_button(parent, iconBundle);
+        }
+        else
+        {
+            return nullptr;
+        }
     }
 
     wxTextCtrl* create_text_ctrl(wxWindow* parent, const wxString& label = wxEmptyString, unsigned long maxLength = 0)
@@ -375,16 +402,14 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     wxBoxSizer* const vinnerSizer = new wxBoxSizer(wxVERTICAL);
 
                     {
-                        const wxIconBundle iconBundle("ico_add", nullptr);
-                        wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "add");
                         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonAdd, this);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonAdd, this);
                         vinnerSizer->Add(button, wxSizerFlags().CentreHorizontal());
                     }
 
                     {
-                        const wxIconBundle iconBundle("ico_remove", nullptr);
-                        wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "remove");
                         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDelete, this);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDelete, this);
                         vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
@@ -396,8 +421,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     }
 
                     {
-                        const wxIconBundle iconBundle("ico_acpect_ratio", nullptr);
-                        wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "acpect_ratio");
                         button->SetToolTip(_("Change resolution/Scale"));
                         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonResolutionScale, this);
@@ -405,8 +429,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     }
 
                     {
-                        const wxIconBundle iconBundle("ico_clear", nullptr);
-                        wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "clear");
                         button->SetToolTip(_("Use original image resolution/Do not scale image"));
                         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonClearResolutionScale, this);
@@ -419,8 +442,8 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                         vinnerSizer->AddStretchSpacer();
 
                         {
-                            const wxIconBundle iconBundle("ico_image", nullptr);
-                            wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+                            wxIconBundle iconBundle;
+                            wxBitmapButton* const button = create_bitmap_button(sizer, "image");
                             button->SetToolTip(_("Launch document viewer"));
                             button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDocOpen, this);
                             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDocOpen, this);
@@ -459,8 +482,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
             m_textCtrlDst->SetValue(fn.GetFullPath());
             innerSizer->Add(m_textCtrlDst, wxSizerFlags().CentreVertical().Proportion(1));
 
-            const wxIconBundle iconBundle("ico_more_horiz", nullptr);
-            wxBitmapButton* const button = create_bitmap_button(sizer, iconBundle);
+            wxBitmapButton* const button = create_bitmap_button(sizer, "more_horiz");
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnChooseDst, this);
             innerSizer->Add(button, wxSizerFlags().CenterVertical().Border(wxLEFT));
 
@@ -604,8 +626,7 @@ wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook, const wxFont& 
         sizer->AddStretchSpacer();
 
         {
-            const wxIconBundle iconBundle("ico_content_copy", nullptr);
-            wxBitmapButton* const button = create_bitmap_button(panel, iconBundle);
+            wxBitmapButton* const button = create_bitmap_button(panel, "content_copy");
             button->SetToolTip(_("Copy all messages to clipboard"));
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnCopyEvents, this);
             button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateMsgCtrls, this);

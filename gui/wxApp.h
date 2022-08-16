@@ -26,6 +26,10 @@ class wxMyApp:
     static const char APP_AUTHOR[];
     static const char LICENSE_FILE_NAME[];
 
+    bool MaterialDesignIconsFound() const;
+    const wxFileName& GetMaterialDesignIconsPath() const;
+    bool LoadMaterialDesignIcon(const wxString&, wxIconBundle&) const;
+
     const wxFileName& GetMuToolPath() const;
     const wxFileName& GetScriptPath() const;
 
@@ -44,6 +48,7 @@ class wxMyApp:
 
     protected:
 
+    wxFileName m_materialDesignIconsPath;
     wxFileName m_scriptPath;
     wxFileName m_muToolPath;
     wxFileName m_sumatraPdfPath;

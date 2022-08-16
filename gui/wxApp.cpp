@@ -111,9 +111,23 @@ namespace
 
         public:
 
-        IconBundleHolder(wxIconBundle& iconBundle, const int iconPos)
+        IconBundleHolder(wxIconBundle& iconBundle, const int iconPos = 0)
             :m_iconBundle(iconBundle), m_iconPos(iconPos), m_pos(0), m_iconsLoaded(false)
         {
+        }
+
+        void Load(WXHINSTANCE hModule, const wxString& resName)
+        {
+            if (!(m_iconsLoaded = load_from_resource(m_icons, resName, hModule)))
+            {
+                return;
+            }
+
+            std::sort(m_icons.begin(), m_icons.end(), icon_cmp);
+            for (wxVector<wxIcon>::const_iterator i = m_icons.begin(), end = m_icons.end(); i != end; ++i)
+            {
+                m_iconBundle.AddIcon(*i);
+            }
         }
 
         void Load(WXHINSTANCE hModule)
@@ -256,6 +270,17 @@ namespace
         return bundleHolder.IconsLoaded();
     }
 
+    bool load_icons(const wxFileName& iconLocation, const wxString& resName, wxIconBundle& iconBundle)
+    {
+        ResourceModuleLoader resourceLoader(iconLocation.GetFullPath());
+        if (!resourceLoader) return false;
+
+        IconBundleHolder bundleHolder(iconBundle);
+        bundleHolder.Load(resourceLoader, resName);
+
+        return bundleHolder.IconsLoaded();
+    }
+
     bool get_file_type_icons(const wxString& fext, wxIconBundle& iconBundle)
     {
         const wxScopedPtr<wxFileType> ft(wxTheMimeTypesManager->GetFileTypeFromExtension(fext));
@@ -298,10 +323,17 @@ namespace
     }
 }
 
+bool wxMyApp::LoadMaterialDesignIcon(const wxString& resName, wxIconBundle& iconBundle) const
+{
+    wxASSERT(MaterialDesignIconsFound());
+    return load_icons(m_materialDesignIconsPath, resName, iconBundle);
+}
+
 void wxMyApp::fill_icon_map()
 {
-    const wxIconBundle icoImg("ico_image", nullptr);
-    wxASSERT(icoImg.IsOk());
+    wxIconBundle icoImg;
+    const bool imgLoaded = LoadMaterialDesignIcon("image", icoImg);
+    wxASSERT(imgLoaded);
 
     std::unordered_map<wxString, wxIconBundle> iconMap;
 
@@ -439,7 +471,6 @@ bool wxMyApp::OnInit()
     if (!wxApp::OnInit()) return false;
 
     wxInitAllImageHandlers();
-    fill_icon_map();
 
     wxLog::EnableLogging(false);
 #ifdef NDEBUG
@@ -466,6 +497,22 @@ bool wxMyApp::OnInit()
     #endif
     }
 
+    m_materialDesignIconsPath.Assign(wxStandardPaths::Get().GetExecutablePath());
+#if defined(NDEBUG) || !defined(__VISUALC__)
+    m_materialDesignIconsPath.SetFullName("material-design-icons.dll");
+#else
+    m_materialDesignIconsPath.SetFullName("material-design-iconsd.dll");
+#endif
+    if (m_materialDesignIconsPath.IsFileReadable())
+    {
+        fill_icon_map();
+    }
+    else
+    {
+        wxLogWarning(_("Unable to find material-design-icons.dll"));
+        return false;
+    }
+
     if (!wxCmdTool::FindTool(wxCmdTool::TOOL_MUTOOL, m_muToolPath))
     {
         wxLogWarning(_("mutool tool not found."));
@@ -480,6 +527,16 @@ bool wxMyApp::OnInit()
     pFrame->Show(true);
 
     return true;
+}
+
+bool wxMyApp::MaterialDesignIconsFound() const
+{
+    return m_materialDesignIconsPath.IsFileReadable();
+}
+
+const wxFileName& wxMyApp::GetMaterialDesignIconsPath() const
+{
+    return m_materialDesignIconsPath;
 }
 
 const wxFileName& wxMyApp::GetScriptPath() const

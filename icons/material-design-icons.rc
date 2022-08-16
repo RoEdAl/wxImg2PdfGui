@@ -1,0 +1,16 @@
+/*
+	material-design-icons.rc
+*/
+
+#include <windows.h>
+LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
+
+picture_as_pdf ICON "ico/picture-as-pdf.ico"
+content_copy ICON "ico/content-copy.ico"
+more_horiz ICON "ico/more-horiz.ico"
+add ICON "ico/add.ico"
+remove ICON "ico/remove.ico"
+image ICON "ico/image.ico"
+link ICON "ico/link.ico"
+acpect_ratio ICON "ico/aspect-ratio.ico"
+clear ICON "ico/clear.ico"
