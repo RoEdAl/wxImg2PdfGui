@@ -3,6 +3,7 @@
  */
 
 #include "SizeDialog.h"
+#include "wxApp.h"
 
 namespace
 {
@@ -43,7 +44,8 @@ SizeDialog::SizeDialog(
         wxBoxSizer* const innerSizer = new wxBoxSizer(wxHORIZONTAL);
 
         {
-            const wxIconBundle iconBundle("ico_link", nullptr);
+            wxIconBundle iconBundle;
+            wxGetApp().LoadMaterialDesignIcon("link", iconBundle);
             wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
             const wxGenericValidator validator(&m_singleValue);
@@ -150,7 +152,8 @@ ScaleDialog::ScaleDialog(
         wxBoxSizer* const innerSizer = new wxBoxSizer(wxHORIZONTAL);
 
         {
-            const wxIconBundle iconBundle("ico_link", nullptr);
+            wxIconBundle iconBundle;
+            wxGetApp().LoadMaterialDesignIcon("link", iconBundle);
             wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
             const wxGenericValidator validator(&m_singleValue);
