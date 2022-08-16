@@ -332,7 +332,7 @@ bool wxMyApp::LoadMaterialDesignIcon(const wxString& resName, wxIconBundle& icon
 void wxMyApp::fill_icon_map()
 {
     wxIconBundle icoImg;
-    const bool imgLoaded = LoadMaterialDesignIcon("image", icoImg);
+    const bool imgLoaded = LoadMaterialDesignIcon("image-image", icoImg);
     wxASSERT(imgLoaded);
 
     std::unordered_map<wxString, wxIconBundle> iconMap;
@@ -498,11 +498,8 @@ bool wxMyApp::OnInit()
     }
 
     m_materialDesignIconsPath.Assign(wxStandardPaths::Get().GetExecutablePath());
-#if defined(NDEBUG) || !defined(__VISUALC__)
     m_materialDesignIconsPath.SetFullName("material-design-icons.dll");
-#else
-    m_materialDesignIconsPath.SetFullName("material-design-iconsd.dll");
-#endif
+
     if (m_materialDesignIconsPath.IsFileReadable())
     {
         fill_icon_map();

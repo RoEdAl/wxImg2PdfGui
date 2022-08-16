@@ -3,15 +3,19 @@
 #
 
 SET(ICONS
-	add
-	aspect-ratio
-	clear
-	content-copy
-	image
-	link
-	more-horiz
-	picture-as-pdf
-	remove
+	action-aspect-ratio
+	action-preview
+	action-today
+	content-add
+	content-clear
+	content-content-copy
+	content-link
+	content-link-off
+	content-remove
+	image-image
+	image-picture-as-pdf	
+	navigation-more-horiz
+	navigation-south
 )
 
 SET(RESOURCE_FILE ${CMAKE_CURRENT_BINARY_DIR}/material-design-icons.rc)
@@ -30,7 +34,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 UNSET(ICO_FILES)
 FOREACH(ICO IN LISTS ICONS)
 	LIST(APPEND ICO_FILES ico/${ICO}.ico)
-	SET(ICO_RES "\"${ICO}\" ICON \"${CMAKE_CURRENT_SOURCE_DIR}/ico/${ICO}.ico\"")
+	SET(ICO_RES "${ICO} ICON \"${CMAKE_CURRENT_SOURCE_DIR}/ico/${ICO}.ico\"")
 	FILE(APPEND ${RESOURCE_FILE} "${ICO_RES}\n")
 ENDFOREACH()
 

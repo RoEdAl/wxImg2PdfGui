@@ -45,7 +45,7 @@ SizeDialog::SizeDialog(
 
         {
             wxIconBundle iconBundle;
-            wxGetApp().LoadMaterialDesignIcon("link", iconBundle);
+            wxGetApp().LoadMaterialDesignIcon("content-link", iconBundle);
             wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
             const wxGenericValidator validator(&m_singleValue);
@@ -153,7 +153,7 @@ ScaleDialog::ScaleDialog(
 
         {
             wxIconBundle iconBundle;
-            wxGetApp().LoadMaterialDesignIcon("link", iconBundle);
+            wxGetApp().LoadMaterialDesignIcon("content-link", iconBundle);
             wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
             const wxGenericValidator validator(&m_singleValue);

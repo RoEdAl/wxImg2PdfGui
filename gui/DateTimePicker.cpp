@@ -3,15 +3,19 @@
  */
  
 #include "DateTimePicker.h"
+#include "wxApp.h"
 
 DateTimePicker::DateTimePicker(wxWindow* parent, wxWindowID id, const wxDateTime& value)
     :wxControl(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE| wxCLIP_CHILDREN)
 {
     wxBoxSizer* const sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    wxToggleButton* toggleButton = new wxToggleButton(this, wxID_ANY, _("Now"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    wxIconBundle iconBundle;
+    wxGetApp().LoadMaterialDesignIcon("action-today", iconBundle);
+    wxBitmapToggleButton* toggleButton = new wxBitmapToggleButton(this, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     toggleButton->SetValue(true);
     toggleButton->Bind(wxEVT_TOGGLEBUTTON, &DateTimePicker::OnToggleButtonCurrent, this);
+    toggleButton->SetToolTip(_("Current date and time"));
     sizer->Add(toggleButton, wxSizerFlags().DoubleBorder(wxRIGHT));
     m_toggleButton = toggleButton;
 

@@ -402,14 +402,14 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     wxBoxSizer* const vinnerSizer = new wxBoxSizer(wxVERTICAL);
 
                     {
-                        wxBitmapButton* const button = create_bitmap_button(sizer, "add");
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "content-add");
                         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonAdd, this);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonAdd, this);
                         vinnerSizer->Add(button, wxSizerFlags().CentreHorizontal());
                     }
 
                     {
-                        wxBitmapButton* const button = create_bitmap_button(sizer, "remove");
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "content-remove");
                         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDelete, this);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDelete, this);
                         vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
@@ -421,7 +421,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     }
 
                     {
-                        wxBitmapButton* const button = create_bitmap_button(sizer, "acpect_ratio");
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "action-aspect-ratio");
                         button->SetToolTip(_("Change resolution/Scale"));
                         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonResolutionScale, this);
@@ -429,7 +429,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     }
 
                     {
-                        wxBitmapButton* const button = create_bitmap_button(sizer, "clear");
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "content-clear");
                         button->SetToolTip(_("Use original image resolution/Do not scale image"));
                         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonClearResolutionScale, this);
@@ -443,7 +443,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
 
                         {
                             wxIconBundle iconBundle;
-                            wxBitmapButton* const button = create_bitmap_button(sizer, "image");
+                            wxBitmapButton* const button = create_bitmap_button(sizer, "action-preview");
                             button->SetToolTip(_("Launch document viewer"));
                             button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDocOpen, this);
                             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDocOpen, this);
@@ -482,7 +482,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
             m_textCtrlDst->SetValue(fn.GetFullPath());
             innerSizer->Add(m_textCtrlDst, wxSizerFlags().CentreVertical().Proportion(1));
 
-            wxBitmapButton* const button = create_bitmap_button(sizer, "more_horiz");
+            wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-more-horiz");
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnChooseDst, this);
             innerSizer->Add(button, wxSizerFlags().CenterVertical().Border(wxLEFT));
 
@@ -626,7 +626,7 @@ wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook, const wxFont& 
         sizer->AddStretchSpacer();
 
         {
-            wxBitmapButton* const button = create_bitmap_button(panel, "content_copy");
+            wxBitmapButton* const button = create_bitmap_button(panel, "content-content-copy");
             button->SetToolTip(_("Copy all messages to clipboard"));
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnCopyEvents, this);
             button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateMsgCtrls, this);
