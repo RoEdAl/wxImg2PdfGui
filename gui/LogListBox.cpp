@@ -24,7 +24,15 @@ wxString ListBox::GetItemsAsText() const
 
     for (int i = 0; i < cnt; ++i)
     {
-        *tos << GetString(i) << endl;
+        const wxString line = GetString(i);
+        if (line.IsEmpty())
+        {
+            *tos << endl;
+        }
+        else
+        {
+            *tos << GetString(i) << endl;
+        }
     }
 
     tos->Flush();
