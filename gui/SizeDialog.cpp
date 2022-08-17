@@ -44,9 +44,9 @@ SizeDialog::SizeDialog(
         wxBoxSizer* const innerSizer = new wxBoxSizer(wxHORIZONTAL);
 
         {
-            wxIconBundle iconBundle;
-            wxGetApp().LoadMaterialDesignIcon("content-link", iconBundle);
-            wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+            wxBitmapBundle bitmapBundle;
+            wxGetApp().LoadMaterialDesignIcon("content-link", bitmapBundle);
+            wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, bitmapBundle, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
             const wxGenericValidator validator(&m_singleValue);
             button->SetValidator(validator);
@@ -152,9 +152,9 @@ ScaleDialog::ScaleDialog(
         wxBoxSizer* const innerSizer = new wxBoxSizer(wxHORIZONTAL);
 
         {
-            wxIconBundle iconBundle;
-            wxGetApp().LoadMaterialDesignIcon("content-link", iconBundle);
-            wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+            wxBitmapBundle bitmapBundle;
+            wxGetApp().LoadMaterialDesignIcon("content-link", bitmapBundle);
+            wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, bitmapBundle, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
             const wxGenericValidator validator(&m_singleValue);
             button->SetValidator(validator);

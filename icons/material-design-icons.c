@@ -1,5 +1,0 @@
-/*
- * material-design-icons.c
- */
- 
- 

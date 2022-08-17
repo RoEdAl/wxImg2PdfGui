@@ -67,6 +67,8 @@ class wxMainFrame:
     void OnButtonAdd(wxCommandEvent&);
     void OnUpdateButtonDelete(wxUpdateUIEvent&);
     void OnButtonDelete(wxCommandEvent&);
+    void OnUpdateButtonSelectAll(wxUpdateUIEvent&);
+    void OnButtonSelectAll(wxCommandEvent&);
     void OnUpdateButtonResolutionScale(wxUpdateUIEvent&);
     void OnButtonResolutionScale(wxCommandEvent&);
     void OnUpdateButtonDocOpen(wxUpdateUIEvent&);

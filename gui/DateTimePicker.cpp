@@ -10,9 +10,9 @@ DateTimePicker::DateTimePicker(wxWindow* parent, wxWindowID id, const wxDateTime
 {
     wxBoxSizer* const sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    wxIconBundle iconBundle;
-    wxGetApp().LoadMaterialDesignIcon("action-today", iconBundle);
-    wxBitmapToggleButton* toggleButton = new wxBitmapToggleButton(this, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    wxBitmapBundle bitmapBundle;
+    wxGetApp().LoadMaterialDesignIcon("action-today", bitmapBundle);
+    wxBitmapToggleButton* toggleButton = new wxBitmapToggleButton(this, wxID_ANY, bitmapBundle, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     toggleButton->SetValue(true);
     toggleButton->Bind(wxEVT_TOGGLEBUTTON, &DateTimePicker::OnToggleButtonCurrent, this);
     toggleButton->SetToolTip(_("Current date and time"));

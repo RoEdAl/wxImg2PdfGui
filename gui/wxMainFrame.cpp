@@ -105,17 +105,17 @@ namespace
         return new wxButton(parent, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     }
 
-    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxIconBundle& iconBundle)
+    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxBitmapBundle& bitmapBundle)
     {
-        return new wxBitmapButton(parentSizer->GetStaticBox(), wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle));
+        return new wxBitmapButton(parentSizer->GetStaticBox(), wxID_ANY, bitmapBundle);
     }
 
     wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxString& resName)
     {
-        wxIconBundle iconBundle;
-        if (wxGetApp().LoadMaterialDesignIcon(resName, iconBundle))
+        wxBitmapBundle bitmapBundle;
+        if (wxGetApp().LoadMaterialDesignIcon(resName, bitmapBundle))
         {
-            return create_bitmap_button(parentSizer, iconBundle);
+            return create_bitmap_button(parentSizer, bitmapBundle);
         }
         else
         {
@@ -123,18 +123,17 @@ namespace
         }
     }
 
-
-    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxIconBundle& iconBundle)
+    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxBitmapBundle& bitmapBundle)
     {
-        return new wxBitmapButton(parent, wxID_ANY, wxBitmapBundle::FromIconBundle(iconBundle));
+        return new wxBitmapButton(parent, wxID_ANY, bitmapBundle);
     }
 
     wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxString& resName)
     {
-        wxIconBundle iconBundle;
-        if (wxGetApp().LoadMaterialDesignIcon(resName, iconBundle))
+        wxBitmapBundle bitmapBundle;
+        if (wxGetApp().LoadMaterialDesignIcon(resName, bitmapBundle))
         {
-            return create_bitmap_button(parent, iconBundle);
+            return create_bitmap_button(parent, bitmapBundle);
         }
         else
         {
@@ -416,12 +415,21 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     }
 
                     {
+                        wxBitmapBundle bitmapBundle;
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "content-select_all");
+                        button->SetToolTip(_("Select all"));
+                        button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonSelectAll, this);
+                        button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonSelectAll, this);
+                        vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                    }
+
+                    {
                         wxStaticLine* const staticLine = create_horizontal_static_line(sizer->GetStaticBox());
                         vinnerSizer->Add(staticLine, get_horizontal_static_line_sizer_flags(sizer->GetStaticBox()));
                     }
 
                     {
-                        wxBitmapButton* const button = create_bitmap_button(sizer, "action-aspect-ratio");
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "action-aspect_ratio");
                         button->SetToolTip(_("Change resolution/Scale"));
                         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, this);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonResolutionScale, this);
@@ -482,7 +490,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
             m_textCtrlDst->SetValue(fn.GetFullPath());
             innerSizer->Add(m_textCtrlDst, wxSizerFlags().CentreVertical().Proportion(1));
 
-            wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-more-horiz");
+            wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-more_horiz");
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnChooseDst, this);
             innerSizer->Add(button, wxSizerFlags().CenterVertical().Border(wxLEFT));
 
@@ -626,7 +634,7 @@ wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook, const wxFont& 
         sizer->AddStretchSpacer();
 
         {
-            wxBitmapButton* const button = create_bitmap_button(panel, "content-content-copy");
+            wxBitmapButton* const button = create_bitmap_button(panel, "content-content_copy");
             button->SetToolTip(_("Copy all messages to clipboard"));
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnCopyEvents, this);
             button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateMsgCtrls, this);
@@ -1430,6 +1438,25 @@ void wxMainFrame::OnButtonDelete(wxCommandEvent& WXUNUSED(event))
         GetThread()->Run();
     }
 
+    post_focus_list();
+}
+
+void wxMainFrame::OnUpdateButtonSelectAll(wxUpdateUIEvent& event)
+{
+    if (m_listViewInputFiles->GetItemCount() > 0)
+    {
+        const wxThread* thread = GetThread();
+        event.Enable(thread == nullptr || !thread->IsAlive());
+    }
+    else
+    {
+        event.Enable(false);
+    }
+}
+
+void wxMainFrame::OnButtonSelectAll(wxCommandEvent& WXUNUSED(event))
+{
+    m_listViewInputFiles->SelectAll();
     post_focus_list();
 }
 

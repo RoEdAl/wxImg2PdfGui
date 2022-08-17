@@ -105,6 +105,30 @@ namespace
         return true;
     }
 
+    bool load_png_from_resource(wxBitmap& bitmap, const wxString& name, WXHINSTANCE module)
+    {
+        const void* data = NULL;
+        size_t outLen = 0;
+
+        // load the PNG resource
+        if (!wxLoadUserResource(&data, &outLen, name, wxS("PNG"), module))
+        {
+            wxLogError(_("Failed to load PNG from resource '%s'."), name);
+            return false;
+        }
+
+        wxMemoryInputStream mis(data, outLen);
+        const wxImage png(mis, wxBITMAP_TYPE_PNG);
+        if (png.IsOk())
+        {
+            const wxBitmap bmp(png);
+            bitmap = bmp;
+            return true;
+        }
+
+        return false;
+    }
+
     class IconBundleHolder
     {
         wxDECLARE_NO_COPY_CLASS(IconBundleHolder);
@@ -281,6 +305,35 @@ namespace
         return bundleHolder.IconsLoaded();
     }
 
+    bool load_pngs(const wxFileName& iconLocation, const wxString& resName, wxBitmapBundle& bitmapBundle)
+    {
+        ResourceModuleLoader resourceLoader(iconLocation.GetFullPath());
+        if (!resourceLoader) return false;
+
+        wxVector<wxBitmap> bitmaps;
+        const std::vector<int> sz{ 18, 24, 36, 48, 64, 96, 128, 256 };
+        for (auto i : sz)
+        {
+            const wxString rn = wxString::Format("%s-%d", resName, i);
+            wxBitmap bmp;
+            if (!load_png_from_resource(bmp, rn, resourceLoader)) return false;
+            bitmaps.push_back(bmp);
+        }
+
+        bitmapBundle = wxBitmapBundle::FromBitmaps(bitmaps);
+        return true;
+    }
+
+    void bmp_to_ico_bundle(const wxBitmapBundle& bitmapBundle, wxIconBundle& iconBundle)
+    {
+        const std::vector<int> sz{ 18, 24, 36, 48, 64, 96, 128, 256 };
+        for (auto i : sz)
+        {
+            const wxSize szs(i, i);
+            iconBundle.AddIcon(bitmapBundle.GetIcon(szs));
+        }
+    }
+
     bool get_file_type_icons(const wxString& fext, wxIconBundle& iconBundle)
     {
         const wxScopedPtr<wxFileType> ft(wxTheMimeTypesManager->GetFileTypeFromExtension(fext));
@@ -323,17 +376,20 @@ namespace
     }
 }
 
-bool wxMyApp::LoadMaterialDesignIcon(const wxString& resName, wxIconBundle& iconBundle) const
+bool wxMyApp::LoadMaterialDesignIcon(const wxString& resName, wxBitmapBundle& bitmapBundle) const
 {
     wxASSERT(MaterialDesignIconsFound());
-    return load_icons(m_materialDesignIconsPath, resName, iconBundle);
+    return load_pngs(m_materialDesignIconsPath, resName, bitmapBundle);
 }
 
 void wxMyApp::fill_icon_map()
 {
-    wxIconBundle icoImg;
-    const bool imgLoaded = LoadMaterialDesignIcon("image-image", icoImg);
+    wxBitmapBundle bmpImg;
+    const bool imgLoaded = LoadMaterialDesignIcon("image-image", bmpImg);
     wxASSERT(imgLoaded);
+
+    wxIconBundle icoImg;
+    bmp_to_ico_bundle(bmpImg, icoImg);
 
     std::unordered_map<wxString, wxIconBundle> iconMap;
 
