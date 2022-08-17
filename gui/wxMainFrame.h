@@ -94,7 +94,7 @@ class wxMainFrame:
 
     private:
 
-    void build_script(wxJson&, wxFileName&) const;
+    void build_script(wxJson&) const;
     void delete_temporary_files();
     void post_focus_list() const;
     virtual wxThread::ExitCode Entry() wxOVERRIDE;

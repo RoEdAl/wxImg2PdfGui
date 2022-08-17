@@ -1073,13 +1073,12 @@ namespace
     }
 }
 
-void wxMainFrame::build_script(wxJson& json, wxFileName& workingDirectory) const
+void wxMainFrame::build_script(wxJson& json) const
 {
-    // output file, working directory
+    // output file
 
     const wxFileName outputPath = wxFileName::FileName(m_textCtrlDst->GetValue());
     json["output"] = outputPath.GetFullPath().utf8_string();
-    workingDirectory = wxFileName::DirName(outputPath.GetPath());
 
     // output options
 
@@ -1259,6 +1258,17 @@ void wxMainFrame::build_script(wxJson& json, wxFileName& workingDirectory) const
     }
 }
 
+namespace
+{
+    wxFileName get_tmp_file_name(const wxFileName& tmpDir, const wxString& fileName)
+    {
+        wxASSERT(tmpDir.IsDir());
+        wxFileName res(tmpDir);
+        res.SetFullName(fileName);
+        return res;
+    }
+}
+
 void wxMainFrame::OnExecMuTool(wxCommandEvent& WXUNUSED(event))
 {
     if (m_pProcess)
@@ -1283,18 +1293,14 @@ void wxMainFrame::OnExecMuTool(wxCommandEvent& WXUNUSED(event))
     params.Add(wxGetApp().GetScriptPath().GetFullPath());
 
     const wxFileName tmpDir = wxFileName::DirName(wxStandardPaths::Get().GetTempDir());
+    const wxFileName jsonPath = get_tmp_file_name(tmpDir, "~img2pdf.json");
+    const wxFileName tmpDocPath = get_tmp_file_name(tmpDir, "~img2pdf.pdf");
+    const wxFileName workingDirectory = m_commonDir->GetFileName().IsOk()? m_commonDir->GetFileName() : wxFileName::DirName(wxFileName::GetCwd());
 
-    wxFileName jsonPath(tmpDir);
-    jsonPath.SetFullName("~img2pdf.json");
-
-    wxFileName tmpDocPath(tmpDir);
-    tmpDocPath.SetFullName("~img2pdf.pdf");
-
-    wxFileName workingDirectory = wxFileName::DirName(wxFileName::GetCwd());
     wxJson script;
     script["tmpDocPath"] = tmpDocPath.GetFullPath().utf8_string();
 
-    build_script(script, workingDirectory);
+    build_script(script);
     if (wxLog::GetVerbose())
     {
         const wxString scriptStr = wxString::FromUTF8Unchecked(script.dump(2));
@@ -1319,7 +1325,6 @@ void wxMainFrame::OnExecMuTool(wxCommandEvent& WXUNUSED(event))
 void wxMainFrame::ExecuteMuTool(const wxArrayString& args, const wxFileName& cwd, const wxArrayFileName& temporaryFiles)
 {
     const wxFileName& mutool = wxGetApp().GetMuToolPath();
-
     ExecuteCmd(mutool, options_to_str(args), cwd, temporaryFiles);
 }
 
@@ -1367,7 +1372,7 @@ void wxMainFrame::OnUpdateButtonAdd(wxUpdateUIEvent& event)
 
 void wxMainFrame::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
 {
-    wxScopedPtr<wxFileDialog> dlgFile(new wxFileDialog(this,
+    const wxScopedPtr<wxFileDialog> dlgFile(new wxFileDialog(this,
         _("Specify input file"),
         wxEmptyString,
         wxEmptyString,
@@ -1580,7 +1585,7 @@ void wxMainFrame::OnDataViewItemActiveted(wxDataViewEvent& event)
             wxVariant v;
             m_listViewInputFiles->GetModel()->GetValue(v, event.GetItem(), 1);
             if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) return;
-            const wxRelativeFileName rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+            const wxRelativeFileName& rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
             wxGetApp().RunDocViewer(rfn.GetFileName());
         }
         break;
@@ -1594,7 +1599,7 @@ void wxMainFrame::OnDataViewItemActiveted(wxDataViewEvent& event)
             const wxResolutionOrScale& ros = get_variant_custom_val<wxVariantDataResolutionOrScale>(v);
             if (ros.HasResolution())
             {
-                wxScopedPtr<SizeDialog> dlg(new SizeDialog(this, wxID_ANY, _("Specify image resolution")));
+                const wxScopedPtr<SizeDialog> dlg(new SizeDialog(this, wxID_ANY, _("Specify image resolution")));
                 dlg->SetValue(ros.GetSize());
                 const int res = dlg->ShowModal();
                 if (res != wxID_OK) return;
@@ -1603,7 +1608,7 @@ void wxMainFrame::OnDataViewItemActiveted(wxDataViewEvent& event)
             }
             else
             {
-                wxScopedPtr<ScaleDialog> dlg(new ScaleDialog(this, wxID_ANY, _("Specify document scale")));
+                const wxScopedPtr<ScaleDialog> dlg(new ScaleDialog(this, wxID_ANY, _("Specify document scale")));
                 dlg->SetValue(ros.GetSize());
                 const int res = dlg->ShowModal();
                 if (res != wxID_OK) return;
@@ -1641,7 +1646,7 @@ void wxMainFrame::OnButtonResolutionScale(wxCommandEvent& WXUNUSED(event))
     {
         const wxSize commonRes = get_common_size(resolutions);
 
-        wxScopedPtr<SizeDialog> dlg(new SizeDialog(this, wxID_ANY, _("Specify image(s) resolution")));
+        const wxScopedPtr<SizeDialog> dlg(new SizeDialog(this, wxID_ANY, _("Specify image(s) resolution")));
         dlg->SetValue(commonRes);
         const int res = dlg->ShowModal();
         if (res != wxID_OK) return;
@@ -1660,7 +1665,7 @@ void wxMainFrame::OnButtonResolutionScale(wxCommandEvent& WXUNUSED(event))
     {
         const wxSize commonRes = get_common_size(scales);
 
-        wxScopedPtr<ScaleDialog> dlg(new ScaleDialog(this, wxID_ANY, _("Specify document(s) scale")));
+        const wxScopedPtr<ScaleDialog> dlg(new ScaleDialog(this, wxID_ANY, _("Specify document(s) scale")));
         dlg->SetValue(commonRes);
         const int res = dlg->ShowModal();
         if (res != wxID_OK) return;
@@ -1673,7 +1678,6 @@ void wxMainFrame::OnButtonResolutionScale(wxCommandEvent& WXUNUSED(event))
                 dataModel->SetValue(wxVariantDataResolutionOrScale::GetScale(newScale), i, 3);
             }
         }
-
     }
 }
 
@@ -1725,7 +1729,7 @@ void wxMainFrame::OnButtonClearResolutionScale(wxCommandEvent& WXUNUSED(event))
 
 void wxMainFrame::OnChooseDst(wxCommandEvent& WXUNUSED(event))
 {
-    wxScopedPtr<wxFileDialog> dlgFile(new wxFileDialog(this,
+    const wxScopedPtr<wxFileDialog> dlgFile(new wxFileDialog(this,
         _("Specify output file"),
         wxEmptyString,
         wxEmptyString,
@@ -1782,17 +1786,15 @@ void wxMainFrame::delete_temporary_files()
 {
     for(const auto& fn: m_temporaryFiles)
     {
-        const wxString fnFullPath = fn.GetFullPath();
-
-        if (!wxFileExists(fnFullPath))
+        if (!fn.FileExists())
         {
-            wxLogDebug("Nonexistent temporary file: %s", fnFullPath);
+            wxLogDebug("Nonexistent temporary file: %s", fn.GetFullName());
             continue;
         }
 
         if (!wxRemoveFile(fn.GetFullPath()))
         {
-            wxLogWarning(_("Unable to delete temporary file: %s"), fnFullPath);
+            wxLogWarning(_("Unable to delete temporary file: %s"), fn.GetFullName());
         }
     }
 
@@ -1961,12 +1963,12 @@ wxThread::ExitCode wxMainFrame::Entry()
 
         dataModel->GetValue(v, i, 1);
         if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) continue;
-        const wxRelativeFileName rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+        const wxRelativeFileName& rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
         afn.push_back(rfn.GetFileName());
 
         dataModel->GetValue(v, i, 2);
         if (v.GetType().CmpNoCase(wxS("wxSize")) != 0) continue;
-        const wxSize imgSize = get_variant_custom_val<wxVariantDataSize>(v);
+        const wxSize& imgSize = get_variant_custom_val<wxVariantDataSize>(v);
 
         dataModel->GetValue(v, i, 3);
         if (v.GetType().CmpNoCase(wxS("wxResolutionOrScale")) != 0) continue;
@@ -2050,7 +2052,7 @@ void wxMainFrame::OnButtonDocOpen(wxCommandEvent& WXUNUSED(event))
     wxVariant v;
     m_listViewInputFiles->GetModel()->GetValue(v, selItem, 1);
     if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) return;
-    const wxRelativeFileName rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+    const wxRelativeFileName& rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
     wxGetApp().RunDocViewer(rfn.GetFileName());
 }
 
