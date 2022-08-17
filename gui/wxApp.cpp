@@ -117,15 +117,13 @@ namespace
             return false;
         }
 
-        wxMemoryInputStream mis(data, outLen);
-        const wxImage png(mis, wxBITMAP_TYPE_PNG);
-        if (png.IsOk())
+        const wxBitmap bmp = wxBitmap::NewFromPNGData(data, outLen);
+        if (bmp.IsOk())
         {
-            const wxBitmap bmp(png);
             bitmap = bmp;
             return true;
         }
-
+        
         return false;
     }
 

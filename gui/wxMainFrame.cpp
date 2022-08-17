@@ -12,6 +12,7 @@ namespace
 {
     const int AUTO_SCROLL_UPDATE_INTERVAL = 2000;
     const int TIMER_IDLE_WAKE_UP_INTERVAL = 250;
+    const wxChar DEFAULT_OUTPUT_FILE_NAME[] = wxS("album.pdf");
 
     template<typename T>
     const T* get_variant_data(const wxVariant& v)
@@ -107,7 +108,9 @@ namespace
 
     wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxBitmapBundle& bitmapBundle)
     {
-        return new wxBitmapButton(parentSizer->GetStaticBox(), wxID_ANY, bitmapBundle);
+        wxBitmapButton* const res = new wxBitmapButton(parentSizer->GetStaticBox(), wxID_ANY, bitmapBundle);
+        res->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+        return res;
     }
 
     wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxString& resName)
@@ -125,7 +128,9 @@ namespace
 
     wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxBitmapBundle& bitmapBundle)
     {
-        return new wxBitmapButton(parent, wxID_ANY, bitmapBundle);
+        wxBitmapButton* const res = new wxBitmapButton(parent, wxID_ANY, bitmapBundle);
+        res->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+        return res;
     }
 
     wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxString& resName)
@@ -144,7 +149,6 @@ namespace
     wxTextCtrl* create_text_ctrl(wxWindow* parent, const wxString& label = wxEmptyString, unsigned long maxLength = 0)
     {
         wxTextCtrl* const res = new wxTextCtrl(parent, wxID_ANY, label);
-
         if (maxLength > 0) res->SetMaxLength(maxLength);
         return res;
     }
@@ -180,14 +184,6 @@ namespace
         wxString txt(wxUniChar(0x2013), charWidth);
         const wxSize extent = dc.GetTextExtent(txt);
         return wxSize(extent.GetWidth(), -1);
-    }
-
-    wxSize calc_text_size(int charWidth, int charHeight)
-    {
-        wxScreenDC dc;
-        wxString txt(wxUniChar(0x2013), charWidth);
-        const wxSize extent = dc.GetTextExtent(txt);
-        return wxSize(extent.GetWidth(), extent.GetHeight() * charHeight);
     }
 
     class MyProcess:
@@ -260,7 +256,7 @@ namespace
     wxFileName get_default_output_fn()
     {
         wxFileName fn = wxFileName::DirName(wxStandardPaths::Get().GetUserDir(wxStandardPaths::Dir_Pictures));
-        fn.SetFullName("output.pdf");
+        fn.SetFullName(DEFAULT_OUTPUT_FILE_NAME);
         return fn;
     }
 
@@ -339,7 +335,7 @@ namespace
     };
 }
 
-wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& toolFont)
+wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
 {
     wxPanel* const    panel = new wxPanel(notebook);
     wxBoxSizer* const panelSizer = new wxBoxSizer(wxVERTICAL);
@@ -450,12 +446,11 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                         vinnerSizer->AddStretchSpacer();
 
                         {
-                            wxIconBundle iconBundle;
                             wxBitmapButton* const button = create_bitmap_button(sizer, "action-preview");
                             button->SetToolTip(_("Launch document viewer"));
                             button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDocOpen, this);
                             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDocOpen, this);
-                            vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal());
+                            vinnerSizer->Add(button, wxSizerFlags().CenterHorizontal().DoubleBorder(wxTOP));
                         }
 
                         innerSizer->Add(vinnerSizer, wxSizerFlags().Expand().Border(wxLEFT));
@@ -466,11 +461,24 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
                     }
                 }
 
-                m_staticTextCommonDir = create_static_text(panel);
-                m_staticTextCommonDir->SetFont(toolFont);
-                m_staticTextCommonDir->SetToolTip(_("Common directory"));
-                m_staticTextCommonDir->Hide();
-                innerSizer->Add(m_staticTextCommonDir, wxSizerFlags().Expand().Border(wxTOP).ReserveSpaceEvenIfHidden());
+                {
+                    wxStaticText* staticText = create_static_text(panel);
+                    staticText->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+                    staticText->SetToolTip(_("Common directory"));
+                    staticText->Hide();
+                    innerSizer->Add(staticText, wxSizerFlags().Expand().ReserveSpaceEvenIfHidden().CenterVertical().Border(wxTOP));
+                    m_staticTextCommonDir = staticText;
+                }
+
+                {
+                    wxButton* const button = create_button(sizer, wxS("\u25BC"));
+                    button->SetToolTip(_("Copy common directory to destination"));
+                    button->Hide();
+                    button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonCopyToDst, this);
+                    button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonCopyToDst, this);
+                    innerSizer->Add(button, wxSizerFlags().Center().Border(wxTOP|wxLEFT).ReserveSpaceEvenIfHidden());
+                    m_buttonCommonDir = button;
+                }
 
                 sizer->Add(innerSizer, wxSizerFlags().Expand().Proportion(1));
             }
@@ -501,37 +509,37 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook, const wxFont& 
             wxFlexGridSizer* const innerSizer = new wxFlexGridSizer(4);
 
             m_checkBoxOutputCompressFonts = create_checkbox(sizer, _T("Compress fonts"), true);
-            m_checkBoxOutputCompressFonts->SetFont(toolFont);
+            m_checkBoxOutputCompressFonts->SetWindowVariant(wxWINDOW_VARIANT_MINI);
             m_checkBoxOutputCompressFonts->SetToolTip(_T("Compress fonts"));
             innerSizer->Add(m_checkBoxOutputCompressFonts);
 
             m_checkBoxOutputPretty = create_checkbox(sizer, _T("Pretty"), true);
-            m_checkBoxOutputPretty->SetFont(toolFont);
+            m_checkBoxOutputPretty->SetWindowVariant(wxWINDOW_VARIANT_MINI);
             m_checkBoxOutputPretty->SetToolTip(_wxS("Pretty\u2011print objects with indentation"));
             innerSizer->Add(m_checkBoxOutputPretty);
 
             m_checkBoxOutputClean = create_checkbox(sizer, _T("Clean"), true);
-            m_checkBoxOutputClean->SetFont(toolFont);
+            m_checkBoxOutputClean->SetWindowVariant(wxWINDOW_VARIANT_MINI);
             m_checkBoxOutputClean->SetToolTip(_wxS("Pretty\u2011print graphics commands in content streams"));
             innerSizer->Add(m_checkBoxOutputClean);
 
             m_checkBoxOutputSanitize = create_checkbox(sizer, _T("Sanitize"), true);
-            m_checkBoxOutputSanitize->SetFont(toolFont);
+            m_checkBoxOutputSanitize->SetWindowVariant(wxWINDOW_VARIANT_MINI);
             m_checkBoxOutputSanitize->SetToolTip(_T("Sanitize graphics commands in content streams"));
             innerSizer->Add(m_checkBoxOutputSanitize);
 
             m_checkBoxOutputLinearize = create_checkbox(sizer, _T("Linearize"));
-            m_checkBoxOutputLinearize->SetFont(toolFont);
+            m_checkBoxOutputLinearize->SetWindowVariant(wxWINDOW_VARIANT_MINI);
             m_checkBoxOutputLinearize->SetToolTip(_T("Optimize for web browsers"));
             innerSizer->Add(m_checkBoxOutputLinearize);
 
             m_checkBoxOutputDecompress = create_checkbox(sizer, _T("Decompress"));
-            m_checkBoxOutputDecompress->SetFont(toolFont);
+            m_checkBoxOutputDecompress->SetWindowVariant(wxWINDOW_VARIANT_MINI);
             m_checkBoxOutputDecompress->SetToolTip(_T("Decompress all streams"));
             innerSizer->Add(m_checkBoxOutputDecompress);
 
             m_checkBoxOutputAscii = create_checkbox(sizer, _T("ASCII"));
-            m_checkBoxOutputAscii->SetFont(toolFont);
+            m_checkBoxOutputAscii->SetWindowVariant(wxWINDOW_VARIANT_MINI);
             m_checkBoxOutputAscii->SetToolTip(_T("ASCII hex encode binary streams"));
             innerSizer->Add(m_checkBoxOutputAscii);
 
@@ -608,15 +616,13 @@ wxPanel* wxMainFrame::create_metadata_pannel(wxNotebook* notebook)
     return panel;
 }
 
-wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook, const wxFont& toolFont)
+wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook)
 {
     wxPanel* const    panel = new wxPanel(notebook);
     wxBoxSizer* const panelSizer = new wxBoxSizer(wxVERTICAL);
 
     {
-        const wxSize listMinSize = calc_text_size(80, 20);
         m_listBoxMessages = new ListBox(panel);
-        m_listBoxMessages->SetSizeHints(listMinSize);
         panelSizer->Add(m_listBoxMessages, wxSizerFlags().Border(wxLEFT|wxRIGHT|wxTOP).Expand().Proportion(1));
     }
 
@@ -625,7 +631,7 @@ wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook, const wxFont& 
 
         {
             wxCheckBox* const checkBox = create_checkbox(panel, _("Verbose"), wxLog::GetVerbose());
-            checkBox->SetFont(toolFont);
+            checkBox->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
             checkBox->SetToolTip(_T("Be more verbose"));
             checkBox->Bind(wxEVT_CHECKBOX, &wxMainFrame::OnCheckVerbose, this);
             sizer->Add(checkBox, wxSizerFlags().CenterVertical());
@@ -648,18 +654,18 @@ wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook, const wxFont& 
     return panel;
 }
 
-wxNotebook* wxMainFrame::create_notebook(const wxFont& toolFont)
+wxNotebook* wxMainFrame::create_notebook()
 {
     wxNotebook* const notebook = new wxNotebook(this, wxID_ANY);
 
-    notebook->AddPage(create_src_dst_pannel(notebook, toolFont), _("Source and destination"), true);
+    notebook->AddPage(create_src_dst_pannel(notebook), _("Source and destination"), true);
     notebook->AddPage(create_metadata_pannel(notebook), _("Metadata"));
-    notebook->AddPage(create_messages_panel(notebook, toolFont), _("Messages"));
+    notebook->AddPage(create_messages_panel(notebook), _("Messages"));
 
     return notebook;
 }
 
-wxBoxSizer* wxMainFrame::create_bottom_ctrls(const wxFont& toolFont)
+wxBoxSizer* wxMainFrame::create_bottom_ctrls()
 {
     wxBoxSizer* const sizer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -667,7 +673,8 @@ wxBoxSizer* wxMainFrame::create_bottom_ctrls(const wxFont& toolFont)
 
     {
         wxButton* const button = new wxButton(this, wxID_ANY, m_execButtonCaptionRun);
-        button->SetFont(wxFont(wxNORMAL_FONT->GetPointSize() + 1, wxNORMAL_FONT->GetFamily(), wxNORMAL_FONT->GetStyle(), wxFONTWEIGHT_BOLD));
+        //button->SetFont(wxFont(wxNORMAL_FONT->GetPointSize() + 1, wxNORMAL_FONT->GetFamily(), wxNORMAL_FONT->GetStyle(), wxFONTWEIGHT_BOLD));
+        button->SetWindowVariant(wxWINDOW_VARIANT_LARGE);
         button->SetToolTip(_("Execute (or kill) mutool utility"));
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonRun, this);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnExecMuTool, this);
@@ -691,8 +698,8 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
     {
         wxBoxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
-        sizer->Add(m_notebook = create_notebook(*wxSMALL_FONT), wxSizerFlags().Proportion(1).Expand());
-        sizer->Add(create_bottom_ctrls(*wxSMALL_FONT), wxSizerFlags().Border().Expand());
+        sizer->Add(m_notebook = create_notebook(), wxSizerFlags().Proportion(1).Expand());
+        sizer->Add(create_bottom_ctrls(), wxSizerFlags().Border().Expand());
         this->SetSizerAndFit(sizer);
     }
 
@@ -1817,11 +1824,13 @@ void wxMainFrame::OnItemUpdated(wxThreadEvent& event)
             {
                 m_staticTextCommonDir->SetLabel(m_commonDir->GetFileName().GetFullPath().RemoveLast());
                 m_staticTextCommonDir->Show();
+                m_buttonCommonDir->Show();
             }
             else
             {
                 m_staticTextCommonDir->SetLabel(wxEmptyString);
                 m_staticTextCommonDir->Show(false);
+                m_buttonCommonDir->Show(false);
             }
             break;
         }
@@ -2043,4 +2052,38 @@ void wxMainFrame::OnButtonDocOpen(wxCommandEvent& WXUNUSED(event))
     if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) return;
     const wxRelativeFileName rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
     wxGetApp().RunDocViewer(rfn.GetFileName());
+}
+
+void wxMainFrame::OnUpdateButtonCopyToDst(wxUpdateUIEvent& event)
+{
+    if (m_pProcess)
+    {
+        event.Enable(false);
+        return;
+    }
+
+    event.Enable(m_commonDir->GetFileName().IsOk());
+}
+
+void wxMainFrame::OnButtonCopyToDst(wxCommandEvent& WXUNUSED(event))
+{
+    const wxFileName& commonDir = m_commonDir->GetFileName();
+    if (!commonDir.IsOk()) return;
+
+    const wxString dst = m_textCtrlDst->GetValue();
+    const wxFileName dstFn = wxFileName::FileName(dst);
+
+    if (dst.IsEmpty() || wxFileName::IsDirWritable(dst) || !dstFn.IsOk())
+    {
+        wxFileName fn;
+        fn.AssignDir(commonDir.GetPath());
+        fn.SetFullName(DEFAULT_OUTPUT_FILE_NAME);
+        m_textCtrlDst->SetValue(fn.GetFullPath());
+    }
+    else
+    {
+        wxFileName fn(dstFn);
+        fn.SetPath(commonDir.GetPath());
+        m_textCtrlDst->SetValue(fn.GetFullPath());
+    }
 }

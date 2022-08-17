@@ -28,6 +28,7 @@ class wxMainFrame:
     wxNotebook* m_notebook;
     wxDataViewListCtrl* m_listViewInputFiles;
     wxStaticText* m_staticTextCommonDir;
+    wxButton* m_buttonCommonDir;
     wxTextCtrl* m_textCtrlDst;
     wxCheckBox* m_checkBoxOutputDecompress;
     wxCheckBox* m_checkBoxOutputCompressFonts;
@@ -73,6 +74,8 @@ class wxMainFrame:
     void OnButtonResolutionScale(wxCommandEvent&);
     void OnUpdateButtonDocOpen(wxUpdateUIEvent&);
     void OnButtonDocOpen(wxCommandEvent&);
+    void OnUpdateButtonCopyToDst(wxUpdateUIEvent&);
+    void OnButtonCopyToDst(wxCommandEvent&);
     void OnButtonClearResolutionScale(wxCommandEvent&);
     void OnChooseDst(wxCommandEvent&);
     void OnCheckShowTimestamps(wxCommandEvent&);
@@ -83,11 +86,11 @@ class wxMainFrame:
 
     private:
 
-    wxPanel* create_src_dst_pannel(wxNotebook*, const wxFont&);
+    wxPanel* create_src_dst_pannel(wxNotebook*);
     wxPanel* create_metadata_pannel(wxNotebook*);
-    wxPanel* create_messages_panel(wxNotebook*, const wxFont&);
-    wxNotebook* create_notebook(const wxFont&);
-    wxBoxSizer* create_bottom_ctrls(const wxFont&);
+    wxPanel* create_messages_panel(wxNotebook*);
+    wxNotebook* create_notebook();
+    wxBoxSizer* create_bottom_ctrls();
 
     private:
 
