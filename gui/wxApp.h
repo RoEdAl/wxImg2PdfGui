@@ -41,6 +41,7 @@ class wxMyApp:
     bool ShowLogTimestamps(bool showTimestamps = true);
     bool GetFnColumn(const wxRelativeFileName&, wxVector<wxVariant>&) const;
     const wxIconBundle& GetAppIcon() const;
+    const wxVariant& GetEmptyString() const;
 
     protected:
 
@@ -54,6 +55,7 @@ class wxMyApp:
     wxFileName m_sumatraPdfPath;
     std::unordered_map<wxString, wxBitmapBundle> m_bitmapMap;
     wxIconBundle m_appIcons;
+    wxVariant m_emptyStr;
     wxVariant m_null;
 
     public:

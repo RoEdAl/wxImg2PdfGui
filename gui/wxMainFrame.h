@@ -29,6 +29,7 @@ class wxMainFrame:
     wxDataViewListCtrl* m_listViewInputFiles;
     wxStaticText* m_staticTextCommonDir;
     wxButton* m_buttonCommonDir;
+    wxSizer* m_sizerDst;
     wxTextCtrl* m_textCtrlDst;
     wxCheckBox* m_checkBoxOutputDecompress;
     wxCheckBox* m_checkBoxOutputCompressFonts;
@@ -37,6 +38,7 @@ class wxMainFrame:
     wxCheckBox* m_checkBoxOutputClean;
     wxCheckBox* m_checkBoxOutputSanitize;
     wxCheckBox* m_checkBoxOutputLinearize;
+    wxStaticText* m_staticTextEstimatedSize;
     wxCheckBox* m_checkBoxMetadataAuthor;
     wxTextCtrl* m_textCtrlMetadataAuthor;
     wxCheckBox* m_checkBoxMetadataTitle;
@@ -83,9 +85,12 @@ class wxMainFrame:
     void OnCopyEvents(wxCommandEvent&);
     void OnItemUpdated(wxThreadEvent&);
     void OnDataViewItemActiveted(wxDataViewEvent&);
+    void OnUpdateEstimatedOutputSize(wxUpdateUIEvent&);
 
     private:
 
+    wxSizer* create_vertical_button_panel(const wxStaticBoxSizer* const) const;
+    wxSizer* create_pdf_options_panel(const wxStaticBoxSizer* const);
     wxPanel* create_src_dst_pannel(wxNotebook*);
     wxPanel* create_metadata_pannel(wxNotebook*);
     wxPanel* create_messages_panel(wxNotebook*);
@@ -97,6 +102,7 @@ class wxMainFrame:
     void build_script(wxJson&) const;
     void delete_temporary_files();
     void post_focus_list() const;
+    void update_total_size_text() const;
     virtual wxThread::ExitCode Entry() wxOVERRIDE;
 
     void ExecuteMuTool(const wxArrayString&, const wxFileName&, const wxArrayFileName&);
@@ -126,6 +132,7 @@ class wxMainFrame:
     bool     m_autoScroll;
 
     wxObjectDataPtr<wxFileNameRefData> m_commonDir;
+    wxULongLong m_totalSize;
 
     public:
 

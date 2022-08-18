@@ -455,6 +455,7 @@ bool wxMyApp::GetFnColumn(const wxRelativeFileName& rfn, wxVector<wxVariant>& co
         {
             column.push_back(wxVariantDataResolutionOrScale::GetResolution(elSize));
         }
+        column.push_back(wxVariant(m_emptyStr));
         column.push_back(m_null);
         return true;
     }
@@ -469,11 +470,17 @@ const wxIconBundle& wxMyApp::GetAppIcon() const
     return m_appIcons;
 }
 
+const wxVariant& wxMyApp::GetEmptyString() const
+{
+    return m_emptyStr;
+}
+
 // ===============================================================================
 
 wxIMPLEMENT_APP(wxMyApp);
 
 wxMyApp::wxMyApp(void)
+    :m_emptyStr(wxString())
 {
 }
 

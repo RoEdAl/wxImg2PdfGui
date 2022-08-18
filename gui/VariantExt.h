@@ -451,7 +451,7 @@ class wxVariantDataSize: public wxVariantData
         }
         else if (m_size.x == m_size.y)
         {
-            str << m_size.x;
+            str << m_size.x << wxS("\u200A\u25FB");
         }
         else
         {
