@@ -6,7 +6,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.23)
 
 SET(WX_PREFIX_LIB_STATIC ${CMAKE_STATIC_LIBRARY_PREFIX}wx)
 SET(WX_PREFIX_LIB_DYNAMIC ${CMAKE_DYNAMIC_LIBRARY_PREFIX}wx)
-SET(WX_SUFFIX_LIB_DYNAMIC _${WXWIDGETS_DLL_SUFFIX}_x64${CMAKE_SHARED_LIBRARY_SUFFIX})
+SET(WX_SUFFIX_LIB_DYNAMIC _${WXWIDGETS_DLL_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX})
 
 FUNCTION(WxConfigureStaticTarget Tgt)
 	TARGET_INCLUDE_DIRECTORIES(WX_${Tgt} INTERFACE
@@ -133,7 +133,7 @@ ENDFOREACH()
 # dynamic libs - msw
 # ---------------------------------------------------------------------
 
-SET(WX_LIBS_MSW adv core gl html media propgrid ribbon richtext stc webview xrc)
+SET(WX_LIBS_MSW adv core gl html propgrid ribbon richtext stc webview xrc)
 FOREACH(L IN LISTS WX_LIBS_MSW)
 	WxAddImportedMswSharedLibrary(${L})
 ENDFOREACH()

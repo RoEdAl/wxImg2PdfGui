@@ -47,7 +47,10 @@ namespace
 
 #pragma pack(pop)
 
-    bool load_from_resource(wxVector<wxIcon>& icons, const wxString& name, WXHINSTANCE module)
+    typedef std::pair<WXWORD, wxIcon> DepthAndIcon;
+    typedef std::vector<DepthAndIcon> TmpIconVector;
+
+    bool load_from_resource(TmpIconVector& icons, const wxString& name, WXHINSTANCE module)
     {
         const void* data = NULL;
         size_t outLen = 0;
@@ -86,9 +89,9 @@ namespace
 
                 if (icon.CreateFromHICON(hIcon))
                 {
-                    const WORD iconDepth = iconDir.wBitCount * iconDir.wPlanes;
-                    if (iconDepth > 0) icon.SetDepth(iconDepth);
-                    icons.push_back(icon);
+                    const WXWORD iconDepth = iconDir.wBitCount * iconDir.wPlanes;
+                    //if (iconDepth > 0) icon.SetDepth(iconDepth);
+                    icons.push_back(std::make_pair(iconDepth, icon));
                 }
                 else
                 {
@@ -146,9 +149,9 @@ namespace
             }
 
             std::sort(m_icons.begin(), m_icons.end(), icon_cmp);
-            for (wxVector<wxIcon>::const_iterator i = m_icons.begin(), end = m_icons.end(); i != end; ++i)
+            for(const auto& i : m_icons)
             {
-                m_iconBundle.AddIcon(*i);
+                m_iconBundle.AddIcon(i.second);
             }
         }
 
@@ -173,9 +176,9 @@ namespace
             }
 
             std::sort(m_icons.begin(), m_icons.end(), icon_cmp);
-            for (wxVector<wxIcon>::const_iterator i = m_icons.begin(), end = m_icons.end(); i != end; ++i)
+            for(const auto& i : m_icons)
             {
-                m_iconBundle.AddIcon(*i);
+                m_iconBundle.AddIcon(i.second);
             }
         }
 
@@ -216,10 +219,10 @@ namespace
             return Process(hModule, pszName, param);
         }
 
-        static bool icon_cmp(const wxIcon& i1, const wxIcon& i2)
+        static bool icon_cmp(const DepthAndIcon& i1, const DepthAndIcon& i2)
         {
-            const wxSize sz1 = i1.GetSize();
-            const wxSize sz2 = i2.GetSize();
+            const wxSize sz1 = i1.second.GetSize();
+            const wxSize sz2 = i2.second.GetSize();
 
             const int px1 = sz1.GetWidth() * sz1.GetHeight();
             const int px2 = sz2.GetWidth() * sz2.GetHeight();
@@ -234,8 +237,8 @@ namespace
             }
             else
             {
-                const int d1 = i1.GetDepth();
-                const int d2 = i2.GetDepth();
+                const int d1 = i1.first;
+                const int d2 = i2.first;
 
                 return d1 < d2;
             }
@@ -246,7 +249,7 @@ namespace
         const int m_iconPos;
         int m_pos;
         bool m_iconsLoaded;
-        wxVector<wxIcon> m_icons;
+        TmpIconVector m_icons;
         wxIconBundle& m_iconBundle;
     };
 

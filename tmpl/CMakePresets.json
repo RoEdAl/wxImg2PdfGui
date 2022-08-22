@@ -23,7 +23,19 @@
 			"FETCHCONTENT_UPDATES_DISCONNECTED": {
 				"type": "BOOL",
 				"value": true
-			}
+			},
+			"CPACK_THREADS": {
+				"type": "STRING",
+				"value": "@PARALLEL_LEVEL@"
+			},
+			"CPACK_ARCHIVE_THREADS": {
+				"type": "STRING",
+				"value": "@PARALLEL_LEVEL@"
+			},
+			"CPACK_PACKAGE_DIRECTORY": {
+				"type": "PATH",
+				"value": "$env{IMG2PDF_WORKDIR}/archive"
+			}			
 		}
 	},
 	{
@@ -108,12 +120,14 @@
 		"name": "mingw64",
 		"hidden": true,
 		"inherits": "base",
+		"targets": ["package"],
 		"configurePreset": "mingw64"
 	},
 	{
 		"name": "msvc",
 		"hidden": true,
 		"inherits": "base",
+		"targets": ["PACKAGE"],
 		"configurePreset": "msvc"
 	},
 	{

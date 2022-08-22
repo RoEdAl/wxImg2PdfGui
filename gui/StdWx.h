@@ -62,6 +62,7 @@
 #include <FmtSpec.h>
 #include <wxJson.h>
 
+#include <utility>
 #include <vector>
 #include <unordered_map>
 

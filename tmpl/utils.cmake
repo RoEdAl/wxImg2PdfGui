@@ -5,11 +5,11 @@ FUNCTION(RemoveLastChar Str)
 	STRING(LENGTH ${Str} StrLen)
 	MATH(EXPR StrLen1 "${StrLen}-1")
 	STRING(SUBSTRING ${Str} 0 ${StrLen1} StrTrimmed)
-	SET(CUE2MKC_WORKDIR ${StrTrimmed} PARENT_SCOPE)
+	SET(IMG2PDF_WORKDIR ${StrTrimmed} PARENT_SCOPE)
 ENDFUNCTION()
 
 FUNCTION(DownloadPkgSha1 UrlBase FileName Sha1Hash StatusMsg)
-	CMAKE_PATH(APPEND CUE2MKC_DLDIR ${FileName} OUTPUT_VARIABLE PkgPath)
+	CMAKE_PATH(APPEND IMG2PDF_DLDIR ${FileName} OUTPUT_VARIABLE PkgPath)
 	
 	IF(EXISTS ${PkgPath})
 		FILE(SHA1 ${PkgPath} PkgHash)
