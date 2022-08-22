@@ -100,6 +100,14 @@
 			"WXWIDGETS_CFG_FILE": {
 				"type": "FILEPATH",
 				"value": "$env{WXWIDGETS_DIR}/msvc-config.cmake"
+			},
+			"CMAKE_C_FLAGS_INIT": {
+				"type": "STRING",
+				"value": "/arch:AVX"
+			},
+			"CMAKE_CXX_FLAGS_INIT": {
+				"type": "STRING",
+				"value": "/arch:AVX"
 			}
 		},
 		"generator": "@MSVC_GENERATOR@",
