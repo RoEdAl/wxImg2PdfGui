@@ -94,6 +94,7 @@ IF(MINGW)
 ENDIF()
 
 ADD_CUSTOM_COMMAND(TARGET material-design-icons POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:wxImg2PdfGui>
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:material-design-icons> $<TARGET_FILE_DIR:wxImg2PdfGui>
 )
 
