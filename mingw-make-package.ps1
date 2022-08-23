@@ -17,20 +17,22 @@ $MingwBuildDir = Join-Path -Path $BuildDir -ChildPath 'mingw64'
 
 if(-Not (Test-Path -Path $MingwBuildDir -PathType Container)) {
 	& $CMake -S $SourceDir --preset mingw64
+	if ( -Not $? ) {
+		exit
+	}
 }
 
 # Build
 $Presets = 'mingw64-debug', 'mingw64-release'
 foreach($preset in $Presets) {
-	$CMakeArgs = @(
-		'--build'
-		'--preset'
-		$preset
-	)
-	$processOptions = @{
-		FilePath = $CMake
-		WorkingDirectory = $SourceDir
-		ArgumentList = $CMakeArgs
+	try {
+		Push-Location -Path $SourceDir
+		& $CMake --build --preset $preset
+		if ( -Not $? ) {
+			exit
+		}
 	}
-	Start-Process @processOptions -NoNewWindow -Wait
+	finally {
+		Pop-Location
+	}
 }

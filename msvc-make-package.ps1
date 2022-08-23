@@ -1,5 +1,5 @@
 #
-# build-wxwidgets.ps1
+# msvc-build-wxwidgets.ps1
 #
 
 # CMake
@@ -17,20 +17,22 @@ $MsvcBuildDir = Join-Path -Path $BuildDir -ChildPath 'msvc'
 
 if(-Not (Test-Path -Path $MsvcBuildDir -PathType Container)) {
 	& $CMake -S $SourceDir --preset msvc
+	if ( -Not $? ) {
+		exit
+	}
 }
 
 # Build
 $Presets = 'msvc-debug', 'msvc-release'
 foreach($preset in $Presets) {
-	$CMakeArgs = @(
-		'--build'
-		'--preset'
-		$preset
-	)
-	$processOptions = @{
-		FilePath = $CMake
-		WorkingDirectory = $SourceDir
-		ArgumentList = $CMakeArgs
+	try {
+		Push-Location -Path $SourceDir
+		& $CMake --build --preset $preset --target 'package'
+		if ( -Not $? ) {
+			exit
+		}
 	}
-	Start-Process @processOptions -NoNewWindow -Wait
+	finally {
+		Pop-Location
+	}
 }
