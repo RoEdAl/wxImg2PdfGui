@@ -73,14 +73,14 @@ MESSAGE(STATUS "wxWidgets configuration: ${WXWIDGETS_CFG_FILE}")
 INCLUDE(${WXWIDGETS_CFG_FILE})
 IF(NOT MINGW)
 	INSTALL(
-		IMPORTED_RUNTIME_ARTIFACTS WX_core WX_base WX_xml
+		IMPORTED_RUNTIME_ARTIFACTS WX_core WX_base
 		DESTINATION img2pdf
 		COMPONENT img2pdf
 	)
 ENDIF()
 ADD_LIBRARY(wxWidgets INTERFACE)
 SET(wxWidgets_LIBRARIES 
-	WX_core	WX_base WX_xml WX_jpeg WX_png WX_tiff WX_zlib WX_regexu WX_expat
+	WX_core	WX_base WX_jpeg WX_png WX_tiff WX_zlib WX_regexu WX_expat
 	comctl32 uuid oleacc uxtheme rpcrt4 shlwapi version wsock32)
 MESSAGE(DEBUG "wxWidgets libs: ${wxWidgets_LIBRARIES}")
 TARGET_LINK_LIBRARIES(wxWidgets INTERFACE ${wxWidgets_LIBRARIES})
