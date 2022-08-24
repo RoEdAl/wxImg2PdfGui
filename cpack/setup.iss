@@ -173,7 +173,7 @@ begin
 				exeRes := 0;
 				DownloadPage.SetText(ExpandConstant('{cm:ExtractingTitle}'), ExpandConstant('{cm:ExtractingDesc,MuPDF}'));
 				Exec(sevenZip, 'e mupdf-{#MuPdfVersion}-windows.zip -omupdf -r *.txt mutool.exe -aoa -bso0', extractDir, SW_HIDE, ewWaitUntilTerminated, exeRes);
-				if exeRes <> 0 then RaiseException(ExpandConstant('{cm:ExtractFailed,MuPDF'));
+				if exeRes <> 0 then RaiseException(ExpandConstant('{cm:ExtractFailed,MuPDF}'));
 			end;
 			
 			if WizardIsTaskSelected('tool/sumatrapdf') then
@@ -181,11 +181,11 @@ begin
 				exeRes := 0;
 				DownloadPage.SetText(ExpandConstant('{cm:ExtractingTitle}'), ExpandConstant('{cm:ExtractingDesc,SumatraPDF}'));
 				Exec(sevenZip, 'e SumatraPDF-{#SumatraPdfVersion}-64.zip -osumatrapdf -aoa -bso0', extractDir, SW_HIDE, ewWaitUntilTerminated, exeRes);
-				if exeRes <> 0 then RaiseException(ExpandConstant('{cm:ExtractFailed,SumatraPDF'));
+				if exeRes <> 0 then RaiseException(ExpandConstant('{cm:ExtractFailed,SumatraPDF}'));
 				if not RenameFile(
 					ExpandConstant('{tmp}/sumatrapdf/SumatraPDF-{#SumatraPdfVersion}-64.exe'),
 					ExpandConstant('{tmp}/sumatrapdf/SumatraPDF.exe')
-				) then RaiseException(ExpandConstant('{cm:RenameFailed,SumatraPDF'));
+				) then RaiseException(ExpandConstant('{cm:RenameFailed,SumatraPDF}'));
 			end;
 			
 			Result := '';
