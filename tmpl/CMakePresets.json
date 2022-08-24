@@ -64,8 +64,8 @@
 		"environment": {
 			"WXWIDGETS_LIB_DIR_NAME": "@WX_MW64_DLL_SUFFIX@",
 			"CMAKE_PROGRAM_PATH": "$env{IMG2PDF_WORKDIR}/ninja;$env{IMG2PDF_WORKDIR}/pandoc;$env{MINGW_DIR}/bin;$env{MINGW_DIR}/x86_64-w64-mingw32/bin;$env{MINGW_DIR}/opt/bin;$env{WXWIDGETS_DIR}/lib/$env{WXWIDGETS_LIB_DIR_NAME}",
-			"CFLAGS": "$env{MINGW_CFLAGS} -march=x86-64-v2 -mtune=generic",
-			"CXXFLAGS": "$env{MINGW_CXXFLAGS} -march=x86-64-v2 -mtune=generic"
+			"CFLAGS": "$env{MINGW_CFLAGS} -march=x86-64 -mtune=generic",
+			"CXXFLAGS": "$env{MINGW_CXXFLAGS} -march=x86-64 -mtune=generic"
 		},
 		"cacheVariables": {
 			"wxWidgets_LIB_DIR": {
@@ -102,14 +102,6 @@
 			"WXWIDGETS_CFG_FILE": {
 				"type": "FILEPATH",
 				"value": "$env{WXWIDGETS_DIR}/msvc-config.cmake"
-			},
-			"CMAKE_C_FLAGS_INIT": {
-				"type": "STRING",
-				"value": "/arch:AVX"
-			},
-			"CMAKE_CXX_FLAGS_INIT": {
-				"type": "STRING",
-				"value": "/arch:AVX"
 			}
 		},
 		"generator": "@MSVC_GENERATOR@",
