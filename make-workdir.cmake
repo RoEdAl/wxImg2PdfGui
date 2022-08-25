@@ -38,16 +38,16 @@ DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-${WXWIDGETS_VERSION}-docs-html.tar.bz
 
 SET(URL_WXWIDGETS "https://github.com/RoEdAl/wxwidgets-builds/releases/download/v${WXWIDGETS_VERSION}-build1")
 IF(INSTALL_MSVC)
-	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-vc-dbg-${WXWIDGETS_VERSION}-win64.7z 90add4d0a97f01d284d97e89522861459f02a394 "wxWidgets dev libraries [MSVC x64]")
-	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-vc-${WXWIDGETS_VERSION}-win64.7z df80c9dbbf711a50c3c31ba391698f6a8287ae50 "wxWidgets libraries [MSVC x64]")
+	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-vc-dbg-${WXWIDGETS_VERSION}-win64.7z b5c34b547bcf6d124643c4bfafac6ab13d7e1517 "wxWidgets dev libraries [MSVC x64]")
+	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-vc-${WXWIDGETS_VERSION}-win64.7z 536d851ef6a96217f388a99e30a9be29f906e948 "wxWidgets libraries [MSVC x64]")
 ENDIF()
 
 IF(INSTALL_MINGW64)
-	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-gcc-dbg-${WXWIDGETS_VERSION}-win64.7z 55bc89acae19e2bb92f1078685f7227b83ada4ea "wxWidgets dev libraries [MinGW64]")
-	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-gcc-${WXWIDGETS_VERSION}-win64.7z 2f4a7b95195044f3fd97f649924fc24f93b16c99 "wxWidgets libraries [MinGW64]")
+	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-gcc-dbg-${WXWIDGETS_VERSION}-win64.7z 2fd7a8e086329c41379265b8853c4a8abf54b7fa "wxWidgets dev libraries [MinGW64]")
+	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-gcc-${WXWIDGETS_VERSION}-win64.7z 4555e9422af7fec47adede4a1b741625913e9fc3 "wxWidgets libraries [MinGW64]")
 	
-	SET(URL_MINGW64 "https://github.com/RoEdAl/ucrt-mingw-builds/releases/download/v12.2.0-v10-ucrt1")
-	DownloadPkgSha1(${URL_MINGW64} x86_64-12.2.0-release-win32-seh-rt_v10-rev0.7z cc8ca5fb3c993ad09feb2f2065f497b200560392 "MinGW64 runtime")
+	SET(URL_MINGW64 "https://github.com/RoEdAl/ucrt-mingw-builds/releases/download/v12.2.0-rt10-ucrt1")
+	DownloadPkgSha1(${URL_MINGW64} x86_64-12.2.0-release-win32-seh-rt_v10-rev0.7z a5d6627688db5423ce68508588f476e0977ac619 "MinGW64 runtime")
 		
 	SET(URL_GCC "http://gcc.gnu.org/onlinedocs/gcc-12.2.0")
 	DownloadPkgSha1(${URL_GCC} gcc.pdf becbd022de78a4f818d53d3229a19f9edb03f88e "GCC documentation - PDF")
