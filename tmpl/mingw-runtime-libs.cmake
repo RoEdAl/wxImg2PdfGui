@@ -27,7 +27,7 @@ MACRO(GnuAddImportedSharedLibraryEx LibName ImpLib DllName)
 ENDMACRO()
 
 GnuAddImportedSharedLibrary(stdcxx
-	${MINGW_DIR}/lib/gcc/x86_64-w64-mingw32/12.1.0/${CMAKE_STATIC_LIBRARY_PREFIX}stdc++${CMAKE_SHARED_LIBRARY_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+	${MINGW_DIR}/lib/gcc/x86_64-w64-mingw32/12.2.0/${CMAKE_STATIC_LIBRARY_PREFIX}stdc++${CMAKE_SHARED_LIBRARY_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
 	${MINGW_DIR}/x86_64-w64-mingw32/lib/${CMAKE_SHARED_LIBRARY_PREFIX}stdc++-6${CMAKE_SHARED_LIBRARY_SUFFIX}
 )
 #GnuAddImportedSharedLibraryEx(stdcxx stdc++ stdc++-6)

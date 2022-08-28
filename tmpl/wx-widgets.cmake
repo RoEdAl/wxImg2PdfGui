@@ -11,7 +11,7 @@ SET(WX_SUFFIX_LIB_DYNAMIC _${WXWIDGETS_DLL_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
 FUNCTION(WxConfigureStaticTarget Tgt)
 	TARGET_INCLUDE_DIRECTORIES(WX_${Tgt} INTERFACE
 		${wxWidgets_LIB_DIR}/$<IF:$<CONFIG:Debug,RelWithDebInfo>,mswud,mswu>
-		${wxWidgets_ROOT_DIR}/include
+		${CMAKE_CURRENT_LIST_DIR}/include
 	)
 ENDFUNCTION()
 
@@ -19,7 +19,7 @@ FUNCTION(WxConfigureDynamicTarget Tgt)
 	TARGET_COMPILE_DEFINITIONS(WX_${Tgt} INTERFACE WXUSINGDLL)
 	TARGET_INCLUDE_DIRECTORIES(WX_${Tgt} INTERFACE
 		${wxWidgets_LIB_DIR}/$<IF:$<CONFIG:Debug,RelWithDebInfo>,mswud,mswu>
-		${wxWidgets_ROOT_DIR}/include
+		${CMAKE_CURRENT_LIST_DIR}/include
 	)
 ENDFUNCTION()
 
@@ -133,7 +133,7 @@ ENDFOREACH()
 # dynamic libs - msw
 # ---------------------------------------------------------------------
 
-SET(WX_LIBS_MSW adv core gl html propgrid ribbon richtext stc webview xrc)
+SET(WX_LIBS_MSW adv core gl html propgrid ribbon richtext stc webview qa)
 FOREACH(L IN LISTS WX_LIBS_MSW)
 	WxAddImportedMswSharedLibrary(${L})
 ENDFOREACH()
