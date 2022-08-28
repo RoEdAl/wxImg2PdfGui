@@ -8,7 +8,7 @@
 		"condition": {"type": "equals","lhs": "${hostSystemName}","rhs": "Windows"},
 		"environment": {
 			"IMG2PDF_WORKDIR": "@IMG2PDF_WORKDIR@",
-			"CMAKE_PROGRAM_PATH": "$env{IMG2PDF_WORKDIR}/ninja;$env{IMG2PDF_WORKDIR}/pandoc"
+			"CMAKE_BUILD_PARALLEL_LEVEL": "@PARALLEL_LEVEL@"
 		},
 		"cacheVariables": {
 			"FETCHCONTENT_QUIET": {
@@ -39,7 +39,6 @@
 		"inherits": "base",
 		"environment": {
 			"CMAKE_COLOR_DIAGNOSTICS": "OFF",
-			"CMAKE_BUILD_PARALLEL_LEVEL": "@PARALLEL_LEVEL@",
 			"MINGW_CFLAGS": "\"-ffile-prefix-map=${fileDir}=.\" \"-ffile-prefix-map=@WXWIDGETS_DIR@=./wx\"",
 			"MINGW_CXXFLAGS": "\"-ffile-prefix-map=${fileDir}=.\" \"-ffile-prefix-map=@WXWIDGETS_DIR@=./wx\""
 		},
@@ -60,7 +59,7 @@
 		"hidden": false,
 		"inherits": "mingw",
 		"environment": {
-			"CMAKE_PROGRAM_PATH": "$env{IMG2PDF_WORKDIR}/ninja;$env{IMG2PDF_WORKDIR}/pandoc;@MINGW_DIR@/bin;@MINGW_DIR@/x86_64-w64-mingw32/bin;@MINGW_DIR@/opt/bin"
+			"CMAKE_PROGRAM_PATH": "$env{IMG2PDF_WORKDIR}/ninja;$env{IMG2PDF_WORKDIR}/pandoc;@MINGW_DIR@/bin;@MINGW_DIR@/x86_64-w64-mingw32/bin;@MINGW_DIR@/opt/bin",
 			"CFLAGS": "-march=x86-64-v2 $env{MINGW_CFLAGS}",
 			"CXXFLAGS": "-march=x86-64-v2 $env{MINGW_CXXFLAGS}"
 		},
