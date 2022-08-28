@@ -8,14 +8,9 @@
 		"condition": {"type": "equals","lhs": "${hostSystemName}","rhs": "Windows"},
 		"environment": {
 			"IMG2PDF_WORKDIR": "@IMG2PDF_WORKDIR@",
-			"WXWIDGETS_DIR": "@WXWIDGETS_DIR@",
 			"CMAKE_PROGRAM_PATH": "$env{IMG2PDF_WORKDIR}/ninja;$env{IMG2PDF_WORKDIR}/pandoc"
 		},
 		"cacheVariables": {
-			"wxWidgets_ROOT_DIR": {
-				"type": "PATH",
-				"value": "$env{WXWIDGETS_DIR}"
-			},
 			"FETCHCONTENT_QUIET": {
 				"type": "BOOL",
 				"value": true
@@ -43,16 +38,19 @@
 		"hidden": true,
 		"inherits": "base",
 		"environment": {
-			"MINGW_DIR": "@MINGW_DIR@",
 			"CMAKE_COLOR_DIAGNOSTICS": "OFF",
 			"CMAKE_BUILD_PARALLEL_LEVEL": "@PARALLEL_LEVEL@",
-			"CFLAGS": "\"-ffile-prefix-map=${fileDir}=.\" \"-ffile-prefix-map=$env{WXWIDGETS_DIR}=./wx\"",
-			"CXXFLAGS": "\"-ffile-prefix-map=${fileDir}=.\" \"-ffile-prefix-map=$env{WXWIDGETS_DIR}=./wx\""
+			"MINGW_CFLAGS": "\"-ffile-prefix-map=${fileDir}=.\" \"-ffile-prefix-map=@WXWIDGETS_DIR@=./wx\"",
+			"MINGW_CXXFLAGS": "\"-ffile-prefix-map=${fileDir}=.\" \"-ffile-prefix-map=@WXWIDGETS_DIR@=./wx\""
 		},
 		"cacheVariables": {
 			"CMAKE_CONFIGURATION_TYPES": {
 				"type": "STRING",
 				"value": "Debug;Release;MinSizeRel;RelWithDebInfo"
+			},
+			"MINGW_CFG_FILE": {
+				"type": "FILEPATH",
+				"value": "@MINGW_DIR@/mingw-config.cmake"
 			}
 		}
 	},
@@ -62,25 +60,22 @@
 		"hidden": false,
 		"inherits": "mingw",
 		"environment": {
-			"WXWIDGETS_LIB_DIR_NAME": "@WX_MW64_DLL_SUFFIX@",
-			"CMAKE_PROGRAM_PATH": "$env{IMG2PDF_WORKDIR}/ninja;$env{IMG2PDF_WORKDIR}/pandoc;$env{MINGW_DIR}/bin;$env{MINGW_DIR}/x86_64-w64-mingw32/bin;$env{MINGW_DIR}/opt/bin;$env{WXWIDGETS_DIR}/lib/$env{WXWIDGETS_LIB_DIR_NAME}"
+			"CMAKE_PROGRAM_PATH": "$env{IMG2PDF_WORKDIR}/ninja;$env{IMG2PDF_WORKDIR}/pandoc;@MINGW_DIR@/bin;@MINGW_DIR@/x86_64-w64-mingw32/bin;@MINGW_DIR@/opt/bin"
+			"CFLAGS": "-march=x86-64-v2 $env{MINGW_CFLAGS}",
+			"CXXFLAGS": "-march=x86-64-v2 $env{MINGW_CXXFLAGS}"
 		},
 		"cacheVariables": {
 			"wxWidgets_LIB_DIR": {
 				"type": "PATH",
-				"value": "$env{WXWIDGETS_DIR}/lib/$env{WXWIDGETS_LIB_DIR_NAME}_x64_dll"
+				"value": "@WXWIDGETS_DIR@/lib/@WX_MW64_DLL_SUFFIX@_x64_dll"
 			},
 			"WXWIDGETS_CFG_FILE": {
 				"type": "FILEPATH",
-				"value": "$env{WXWIDGETS_DIR}/mingw64-config.cmake"
-			},
-			"MINGW_CFG_FILE": {
-				"type": "FILEPATH",
-				"value": "$env{MINGW_DIR}/mingw-config.cmake"
+				"value": "@WXWIDGETS_DIR@/mingw64-config.cmake"
 			}
 		},
 		"generator": "Ninja Multi-Config",
-		"toolchainFile": "$env{MINGW_DIR}/mingw-toolchain.cmake",
+		"toolchainFile": "@MINGW_DIR@/mingw-toolchain.cmake",
 		"binaryDir": "../build/mingw64",
 		"installDir": "../install/mingw64"
 	},
@@ -89,17 +84,14 @@
 		"displayName": "@MSVC_GENERATOR@ - @MSVC_TOOLSET@",
 		"hidden": false,
 		"inherits": "base",
-		"environment": {
-			"WXWIDGETS_LIB_DIR_NAME": "@WX_MSVC_DLL_SUFFIX@"
-		},
 		"cacheVariables": {
 			"wxWidgets_LIB_DIR": {
 				"type": "PATH",
-				"value": "$env{WXWIDGETS_DIR}/lib/$env{WXWIDGETS_LIB_DIR_NAME}_x64_dll"
+				"value": "@WXWIDGETS_DIR@/lib/@WX_MSVC_DLL_SUFFIX@_x64_dll"
 			},
 			"WXWIDGETS_CFG_FILE": {
 				"type": "FILEPATH",
-				"value": "$env{WXWIDGETS_DIR}/msvc-config.cmake"
+				"value": "@WXWIDGETS_DIR@/msvc-config.cmake"
 			}
 		},
 		"generator": "@MSVC_GENERATOR@",
