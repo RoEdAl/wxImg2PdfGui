@@ -125,19 +125,15 @@ ADD_SUBDIRECTORY(license)
 ADD_SUBDIRECTORY(gui)
 
 # icons - BEGIN
+SET(MATERIAL_DESTINATION_TARGETS wxImg2PdfGui)
 ADD_SUBDIRECTORY(material-design-icons)
-ADD_CUSTOM_COMMAND(TARGET material-design-icons POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:wxImg2PdfGui>
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:material-design-icons> $<TARGET_FILE_DIR:wxImg2PdfGui>
-)
-
-ADD_DEPENDENCIES(wxImg2PdfGui material-design-icons)
 
 INSTALL(
 	TARGETS material-design-icons
 	DESTINATION img2pdf
 	COMPONENT img2pdf
 )
+UNSET(MATERIAL_DESTINATION_TARGETS)
 # icons - END
 
 ADD_SUBDIRECTORY(cpack/7-zip)
