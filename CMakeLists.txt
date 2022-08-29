@@ -123,7 +123,23 @@ TARGET_INCLUDE_DIRECTORIES(wxCmdTools PRIVATE ${IMG2PDF_INCLUDE_DIR})
 ADD_SUBDIRECTORY(js)
 ADD_SUBDIRECTORY(license)
 ADD_SUBDIRECTORY(gui)
-ADD_SUBDIRECTORY(icons)
+
+# icons - BEGIN
+ADD_SUBDIRECTORY(material-design-icons)
+ADD_CUSTOM_COMMAND(TARGET material-design-icons POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:wxImg2PdfGui>
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:material-design-icons> $<TARGET_FILE_DIR:wxImg2PdfGui>
+)
+
+ADD_DEPENDENCIES(wxImg2PdfGui material-design-icons)
+
+INSTALL(
+	TARGETS material-design-icons
+	DESTINATION img2pdf
+	COMPONENT img2pdf
+)
+# icons - END
+
 ADD_SUBDIRECTORY(cpack/7-zip)
 ADD_SUBDIRECTORY(cpack/sumatra-pdf)
 

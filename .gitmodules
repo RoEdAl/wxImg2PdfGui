@@ -7,3 +7,6 @@
 [submodule "js"]
 	path = js
 	url = https://github.com/RoEdAl/mu-img2pdf
+[submodule "material-design-icons"]
+	path = material-design-icons
+	url = https://github.com/RoEdAl/material-design-icons.git
