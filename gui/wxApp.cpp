@@ -306,7 +306,37 @@ namespace
         return bundleHolder.IconsLoaded();
     }
 
-    bool load_pngs(const wxFileName& iconLocation, const wxString& resName, wxBitmapBundle& bitmapBundle)
+    double window_variant_to_scale(const wxWindowVariant windowVariant)
+    {
+        switch (windowVariant)
+        {
+            case wxWINDOW_VARIANT_SMALL:
+            return 1.25;
+
+            case wxWINDOW_VARIANT_MINI:
+            return 1.25 * 1.25;
+
+            case wxWINDOW_VARIANT_LARGE:
+            return 1.0 / 1.25;
+
+            default:
+            return 1.0;
+        }
+    }
+
+    double get_scale_factor(const wxWindow* const wnd)
+    {
+        if (wnd != nullptr)
+        {
+            return window_variant_to_scale(wnd->GetWindowVariant());
+        }
+        else
+        {
+            return window_variant_to_scale(wxWINDOW_VARIANT_NORMAL);
+        }
+    }
+
+    bool load_pngs(const wxFileName& iconLocation, const wxString& resName, wxBitmapBundle& bitmapBundle, const double scaleFactor)
     {
         ResourceModuleLoader resourceLoader(iconLocation.GetFullPath());
         if (!resourceLoader) return false;
@@ -318,6 +348,7 @@ namespace
             const wxString rn = wxString::Format("%s-%d", resName, i);
             wxBitmap bmp;
             if (!load_png_from_resource(bmp, rn, resourceLoader)) return false;
+            bmp.SetScaleFactor(scaleFactor);
             bitmaps.push_back(bmp);
         }
 
@@ -377,16 +408,24 @@ namespace
     }
 }
 
-bool wxMyApp::LoadMaterialDesignIcon(const wxString& resName, wxBitmapBundle& bitmapBundle) const
+bool wxMyApp::LoadMaterialDesignIcon(const wxWindow* const wnd, const wxString& resName, wxBitmapBundle& bitmapBundle) const
 {
     wxASSERT(MaterialDesignIconsFound());
-    return load_pngs(m_materialDesignIconsPath, resName, bitmapBundle);
+    const double bitmapScale = get_scale_factor(wnd);
+    return load_pngs(m_materialDesignIconsPath, resName, bitmapBundle, bitmapScale);
+}
+
+bool wxMyApp::LoadMaterialDesignIcon(const wxString& resName, const wxWindowVariant windowVariant, wxBitmapBundle& bitmapBundle) const
+{
+    wxASSERT(MaterialDesignIconsFound());
+    const double bitmapScale = window_variant_to_scale(windowVariant);
+    return load_pngs(m_materialDesignIconsPath, resName, bitmapBundle, bitmapScale);
 }
 
 void wxMyApp::fill_icon_map()
 {
     wxBitmapBundle bmpImg;
-    const bool imgLoaded = LoadMaterialDesignIcon("image-image", bmpImg);
+    const bool imgLoaded = LoadMaterialDesignIcon("image-image", wxWINDOW_VARIANT_NORMAL, bmpImg);
     wxASSERT(imgLoaded);
 
     wxIconBundle icoImg;

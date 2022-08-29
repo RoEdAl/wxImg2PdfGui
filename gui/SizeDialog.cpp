@@ -17,6 +17,15 @@ namespace
         return wxSizerFlags().Expand().Border(wxLEFT|wxRIGHT|wxTOP);
     }
 
+    wxBitmapToggleButton* create_toggle_button(wxWindow* const parent)
+    {
+        wxBitmapBundle bitmapBundle;
+        wxGetApp().LoadMaterialDesignIcon("content-link", wxWINDOW_VARIANT_SMALL, bitmapBundle);
+        wxBitmapToggleButton* const button = new wxBitmapToggleButton(parent, wxID_ANY, bitmapBundle, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+        button->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+        return button;
+    }
+
     void fill_standard_resolutions_array(wxArrayString& standardResolutions, const wxWindow* wnd, bool x)
     {
         const wxDisplay dpl(wnd);
@@ -42,17 +51,16 @@ SizeDialog::SizeDialog(
 
     {
         wxBoxSizer* const innerSizer = new wxBoxSizer(wxHORIZONTAL);
+        const wxSizerFlags ctrlFlags = wxSizerFlags().CenterVertical();
 
         {
-            wxBitmapBundle bitmapBundle;
-            wxGetApp().LoadMaterialDesignIcon("content-link", bitmapBundle);
-            wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, bitmapBundle, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+            wxBitmapToggleButton* const button = create_toggle_button(this);
 
             const wxGenericValidator validator(&m_singleValue);
             button->SetValidator(validator);
 
             button->Bind(wxEVT_TOGGLEBUTTON, &SizeDialog::OnToggleSingleValue, this);
-            innerSizer->Add(button, wxSizerFlags().Border(wxRIGHT).CenterVertical());
+            innerSizer->Add(button, wxSizerFlags(ctrlFlags).Border(wxRIGHT));
         }
 
         {
@@ -60,13 +68,14 @@ SizeDialog::SizeDialog(
             fill_standard_resolutions_array(standardResolutions, this, true);
             const wxIntegerValidator<int> validator(&m_size.x, 0, 16384);
             wxComboBox* const comboBox = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, standardResolutions, wxCB_SORT, validator);
-            innerSizer->Add(comboBox, wxSizerFlags().CenterVertical());
+            innerSizer->Add(comboBox, ctrlFlags);
             m_comboBoxWidth = comboBox;
         }
 
         {
             wxStaticText* const staticTxt = new wxStaticText(this, wxID_ANY, wxS('\u00D7'));
-            innerSizer->Add(staticTxt, wxSizerFlags().Border(wxLEFT|wxRIGHT).CenterVertical());
+            staticTxt->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+            innerSizer->Add(staticTxt, wxSizerFlags(ctrlFlags).Border(wxLEFT|wxRIGHT));
             m_staticTextSeparator = staticTxt;
         }
 
@@ -75,13 +84,14 @@ SizeDialog::SizeDialog(
             fill_standard_resolutions_array(standardResolutions, this, false);
             const wxIntegerValidator<int> validator(&m_size.y, 0, 16384);
             wxComboBox* const comboBox = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, standardResolutions, wxCB_SORT, validator);
-            innerSizer->Add(comboBox, wxSizerFlags().CenterVertical());
+            innerSizer->Add(comboBox, ctrlFlags);
             m_comboBoxHeight = comboBox;
         }
 
         {
             wxStaticText* const staticTxt = new wxStaticText(this, wxID_ANY, wxS("dpi"));
-            innerSizer->Add(staticTxt, wxSizerFlags().Border(wxLEFT | wxRIGHT).CenterVertical());
+            staticTxt->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+            innerSizer->Add(staticTxt, wxSizerFlags(ctrlFlags).Border(wxLEFT | wxRIGHT));
         }
 
         sizer->Add(innerSizer, wxSizerFlags().Expand().Border());
@@ -150,17 +160,16 @@ ScaleDialog::ScaleDialog(
 
     {
         wxBoxSizer* const innerSizer = new wxBoxSizer(wxHORIZONTAL);
+        const wxSizerFlags ctrlFlags = wxSizerFlags().CenterVertical();
 
         {
-            wxBitmapBundle bitmapBundle;
-            wxGetApp().LoadMaterialDesignIcon("content-link", bitmapBundle);
-            wxBitmapToggleButton* const button = new wxBitmapToggleButton(this, wxID_ANY, bitmapBundle, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+            wxBitmapToggleButton* const button = create_toggle_button(this);
 
             const wxGenericValidator validator(&m_singleValue);
             button->SetValidator(validator);
 
             button->Bind(wxEVT_TOGGLEBUTTON, &ScaleDialog::OnToggleSingleValue, this);
-            innerSizer->Add(button, wxSizerFlags().Border(wxRIGHT).CenterVertical());
+            innerSizer->Add(button, wxSizerFlags(ctrlFlags).Border(wxRIGHT));
         }
 
         {
@@ -168,13 +177,14 @@ ScaleDialog::ScaleDialog(
             wxSpinCtrl* const spinCtrl = new wxSpinCtrl(this, wxID_ANY);
             spinCtrl->SetRange(0, 5000);
             spinCtrl->SetValidator(validator);
-            innerSizer->Add(spinCtrl, wxSizerFlags().CenterVertical());
+            innerSizer->Add(spinCtrl, ctrlFlags);
             m_spinCtrlWidth = spinCtrl;
         }
 
         {
             wxStaticText* const staticTxt = new wxStaticText(this, wxID_ANY, wxS('\u00D7'));
-            innerSizer->Add(staticTxt, wxSizerFlags().Border(wxLEFT | wxRIGHT).CenterVertical());
+            staticTxt->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+            innerSizer->Add(staticTxt, wxSizerFlags(ctrlFlags).Border(wxLEFT | wxRIGHT));
             m_staticTextSeparator = staticTxt;
         }
 
@@ -183,13 +193,14 @@ ScaleDialog::ScaleDialog(
             wxSpinCtrl* const spinCtrl = new wxSpinCtrl(this, wxID_ANY);
             spinCtrl->SetRange(0, 5000);
             spinCtrl->SetValidator(validator);
-            innerSizer->Add(spinCtrl, wxSizerFlags().CenterVertical());
+            innerSizer->Add(spinCtrl, ctrlFlags);
             m_spinCtrlHeight = spinCtrl;
         }
 
         {
             wxStaticText* const staticTxt = new wxStaticText(this, wxID_ANY, wxS('%'));
-            innerSizer->Add(staticTxt, wxSizerFlags().Border(wxLEFT | wxRIGHT).CenterVertical());
+            staticTxt->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+            innerSizer->Add(staticTxt, wxSizerFlags(ctrlFlags).Border(wxLEFT | wxRIGHT));
         }
 
         sizer->Add(innerSizer, wxSizerFlags().Expand().Border());

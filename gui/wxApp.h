@@ -28,7 +28,8 @@ class wxMyApp:
 
     bool MaterialDesignIconsFound() const;
     const wxFileName& GetMaterialDesignIconsPath() const;
-    bool LoadMaterialDesignIcon(const wxString&, wxBitmapBundle&) const;
+    bool LoadMaterialDesignIcon(const wxWindow* const, const wxString&, wxBitmapBundle&) const;
+    bool LoadMaterialDesignIcon(const wxString&, const wxWindowVariant, wxBitmapBundle&) const;
 
     const wxFileName& GetMuToolPath() const;
     const wxFileName& GetScriptPath() const;

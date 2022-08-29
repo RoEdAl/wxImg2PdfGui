@@ -106,19 +106,19 @@ namespace
         return new wxButton(parent, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     }
 
-    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxBitmapBundle& bitmapBundle)
+    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapButton* const res = new wxBitmapButton(parentSizer->GetStaticBox(), wxID_ANY, bitmapBundle);
-        res->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+        res->SetWindowVariant(windowVariant);
         return res;
     }
 
-    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxString& resName)
+    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapBundle bitmapBundle;
-        if (wxGetApp().LoadMaterialDesignIcon(resName, bitmapBundle))
+        if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
         {
-            return create_bitmap_button(parentSizer, bitmapBundle);
+            return create_bitmap_button(parentSizer, bitmapBundle, windowVariant);
         }
         else
         {
@@ -126,19 +126,19 @@ namespace
         }
     }
 
-    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxBitmapBundle& bitmapBundle)
+    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapButton* const res = new wxBitmapButton(parent, wxID_ANY, bitmapBundle);
-        res->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+        res->SetWindowVariant(windowVariant);
         return res;
     }
 
-    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxString& resName)
+    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapBundle bitmapBundle;
-        if (wxGetApp().LoadMaterialDesignIcon(resName, bitmapBundle))
+        if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
         {
-            return create_bitmap_button(parent, bitmapBundle);
+            return create_bitmap_button(parent, bitmapBundle, windowVariant);
         }
         else
         {
@@ -544,7 +544,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
                 }
 
                 {
-                    wxButton* const button = create_button(sizer, wxS("\u25BC"));
+                    wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-south");
                     button->SetToolTip(_("Copy common directory to destination"));
                     button->Hide();
                     button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonCopyToDst, this);
@@ -575,7 +575,7 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
             }
 
             {
-                wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-more_horiz");
+                wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-more_horiz", wxWINDOW_VARIANT_NORMAL);
                 button->Bind(wxEVT_BUTTON, &wxMainFrame::OnChooseDst, this);
                 innerSizer->Add(button, wxSizerFlags().CenterVertical().Border(wxLEFT));
             }
