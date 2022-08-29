@@ -106,11 +106,29 @@ namespace
         return new wxButton(parent, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     }
 
-    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
-        wxBitmapButton* const res = new wxBitmapButton(parentSizer->GetStaticBox(), wxID_ANY, bitmapBundle);
+        wxBitmapButton* const res = new wxBitmapButton(parent, wxID_ANY, bitmapBundle);
         res->SetWindowVariant(windowVariant);
         return res;
+    }
+
+    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        return create_bitmap_button(parentSizer->GetStaticBox(), bitmapBundle, windowVariant);
+    }
+
+    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        wxBitmapBundle bitmapBundle;
+        if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
+        {
+            return create_bitmap_button(parent, bitmapBundle, windowVariant);
+        }
+        else
+        {
+            return nullptr;
+        }
     }
 
     wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
@@ -126,19 +144,38 @@ namespace
         }
     }
 
-    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+
+    wxStaticBitmap* create_static_bitmap(wxWindow* parent, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
-        wxBitmapButton* const res = new wxBitmapButton(parent, wxID_ANY, bitmapBundle);
+        wxStaticBitmap* const res = new wxStaticBitmap(parent, wxID_ANY, bitmapBundle);
         res->SetWindowVariant(windowVariant);
         return res;
     }
 
-    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxStaticBitmap* create_static_bitmap(const wxStaticBoxSizer* parentSizer, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        return create_static_bitmap(parentSizer->GetStaticBox(), bitmapBundle, windowVariant);
+    }
+
+    wxStaticBitmap* create_static_bitmap(wxWindow* parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapBundle bitmapBundle;
         if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
         {
-            return create_bitmap_button(parent, bitmapBundle, windowVariant);
+            return create_static_bitmap(parent, bitmapBundle, windowVariant);
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+
+    wxStaticBitmap* create_static_bitmap(const wxStaticBoxSizer* parentSizer, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        wxBitmapBundle bitmapBundle;
+        if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
+        {
+            return create_static_bitmap(parentSizer, bitmapBundle, windowVariant);
         }
         else
         {
@@ -186,6 +223,18 @@ namespace
     wxSizerFlags get_horizontal_static_line_sizer_flags(wxWindow* wnd)
     {
         return wxSizerFlags().Expand().Border(wxTOP | wxBOTTOM, wnd->FromDIP(2));
+    }
+
+    wxHyperlinkCtrl* create_hyperlink(wxWindow* const parent, const wxString& label = wxEmptyString, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        wxHyperlinkCtrl* const res = new wxHyperlinkCtrl(parent, wxID_ANY, label, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxNO_BORDER | wxHL_ALIGN_CENTRE);
+        res->SetWindowVariant(windowVariant);
+        return res;
+    }
+
+    wxHyperlinkCtrl* create_hyperlink(const wxStaticBoxSizer* const parentSizer, const wxString& label = wxEmptyString, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        return create_hyperlink(parentSizer->GetStaticBox(), label, windowVariant);
     }
 
     wxSize calc_text_size(const wxWindow* const wnd, int charWidth)
@@ -535,16 +584,30 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
                 }
 
                 {
-                    wxStaticText* staticText = create_static_text(panel);
-                    staticText->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
-                    staticText->SetToolTip(_("Common directory"));
-                    staticText->Hide();
-                    innerSizer->Add(staticText, wxSizerFlags().Expand().ReserveSpaceEvenIfHidden().CenterVertical().Border(wxTOP));
-                    m_staticTextCommonDir = staticText;
+                    wxBoxSizer* const hsizer = new wxBoxSizer(wxHORIZONTAL);
+                    const wxSizerFlags ctrlFlags = wxSizerFlags().CenterVertical().ReserveSpaceEvenIfHidden();
+
+                    {
+                        wxStaticBitmap* const staticBitmap = create_static_bitmap(panel, "file-folder");
+                        staticBitmap->SetToolTip(_("Common directory"));
+                        hsizer->Add(staticBitmap, wxSizerFlags(ctrlFlags).Border(wxRIGHT, panel->FromDIP(4)));
+                    }
+
+                    {
+                        wxStaticText* const staticText = create_static_text(panel);
+                        staticText->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+                        staticText->SetToolTip(_("Common directory"));
+                        hsizer->Add(staticText, wxSizerFlags(ctrlFlags).Proportion(1));
+                        m_staticTextCommonDir = staticText;
+                    }
+
+                    innerSizer->Add(hsizer, wxSizerFlags(ctrlFlags).Expand().Border(wxTOP));
+                    hsizer->Show(false);
+                    m_sizerCommonDir = hsizer;
                 }
 
                 {
-                    wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-south");
+                    wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-arrow_downward");
                     button->SetToolTip(_("Copy common directory to destination"));
                     button->Hide();
                     button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonCopyToDst, this);
@@ -594,12 +657,12 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
             innerSizer->AddStretchSpacer();
 
             {
-                wxStaticText* const staticText = create_centered_static_text(sizer);
-                staticText->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
-                staticText->SetToolTip(_("Estimated output file size"));
-                staticText->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateEstimatedOutputSize, this);
-                innerSizer->Add(staticText, wxSizerFlags().CenterVertical().DoubleBorder(wxLEFT));
-                m_staticTextEstimatedSize = staticText;
+                wxHyperlinkCtrl* const hyperlinkCtrl = create_hyperlink(sizer);
+                hyperlinkCtrl->SetToolTip(_("Estimated output file size\nClick to open"));
+                hyperlinkCtrl->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateEstimatedOutputSize, this);
+                hyperlinkCtrl->Bind(wxEVT_HYPERLINK, &wxMainFrame::OnOpenDestination, this);
+                innerSizer->Add(hyperlinkCtrl, wxSizerFlags().CenterVertical().DoubleBorder(wxLEFT));
+                m_hyperlinkCtrlEstimatedSize = hyperlinkCtrl;
             }
 
             sizer->Add(innerSizer, wxSizerFlags().Expand().Border(wxTOP));
@@ -1934,13 +1997,15 @@ void wxMainFrame::OnItemUpdated(wxThreadEvent& event)
             if (m_commonDir->GetFileName().IsOk())
             {
                 m_staticTextCommonDir->SetLabel(m_commonDir->GetFileName().GetFullPath().RemoveLast());
-                m_staticTextCommonDir->Show();
+                //m_staticTextCommonDir->Show();
+                m_sizerCommonDir->Show(true);
                 m_buttonCommonDir->Show();
             }
             else
             {
                 m_staticTextCommonDir->SetLabel(wxEmptyString);
-                m_staticTextCommonDir->Show(false);
+                //m_staticTextCommonDir->Show(false);
+                m_sizerCommonDir->Show(false);
                 m_buttonCommonDir->Show(false);
             }
 
@@ -1966,7 +2031,7 @@ void wxMainFrame::OnItemUpdated(wxThreadEvent& event)
 
 void wxMainFrame::update_total_size_text() const
 {
-    m_staticTextEstimatedSize->SetLabel(wxFileName::GetHumanReadableSize(m_totalSize, wxEmptyString));
+    m_hyperlinkCtrlEstimatedSize->SetLabel(wxFileName::GetHumanReadableSize(m_totalSize, wxEmptyString));
     m_sizerDst->Layout();
 }
 
@@ -2246,6 +2311,30 @@ void wxMainFrame::OnUpdateEstimatedOutputSize(wxUpdateUIEvent& event)
     }
     else
     {
-        event.Enable(true);
+        event.Enable(wxGetApp().SumatraPdfFound());
     }
+}
+
+void wxMainFrame::OnOpenDestination(wxHyperlinkEvent& WXUNUSED(event))
+{
+    if (m_pProcess)
+    {
+        return;
+    }
+
+    {
+        const wxThread* thread = GetThread();
+        if (thread != nullptr && thread->IsAlive())
+        {
+            return;
+        }
+    }
+
+    if (!wxGetApp().SumatraPdfFound()) return;
+
+    const wxString fns = m_textCtrlDst->GetValue();
+    if (fns.IsEmpty()) return;
+    const wxFileName fn = wxFileName::FileName(fns);
+    if (!fn.IsFileReadable()) return;
+    wxGetApp().RunDocViewer(fn);
 }

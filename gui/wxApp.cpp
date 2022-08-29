@@ -670,7 +670,7 @@ namespace
 
 bool wxMyApp::RunDocViewer(const wxFileName& doc) const
 {
-    wxASSERT(doc.IsDirReadable());
+    wxASSERT(doc.IsFileReadable());
 
     const wxString sumatraPdfPath = get_short_path_if_possible(m_sumatraPdfPath);
 

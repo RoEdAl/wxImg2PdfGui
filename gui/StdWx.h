@@ -28,10 +28,12 @@
 #include <wx/statline.h>
 #include <wx/valgen.h>
 #include <wx/notebook.h>
+#include <wx/statbmp.h>
 #include <wx/bmpbuttn.h>
 #include <wx/dataview.h>
 #include <wx/tglbtn.h>
 #include <wx/spinctrl.h>
+#include <wx/hyperlink.h>
 #include <wx/frame.h>
 #include <wx/app.h>
 #include <wx/cmdline.h>

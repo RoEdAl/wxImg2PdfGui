@@ -28,6 +28,7 @@ class wxMainFrame:
     wxNotebook* m_notebook;
     wxDataViewListCtrl* m_listViewInputFiles;
     wxStaticText* m_staticTextCommonDir;
+    wxSizer* m_sizerCommonDir;
     wxButton* m_buttonCommonDir;
     wxSizer* m_sizerDst;
     wxTextCtrl* m_textCtrlDst;
@@ -38,7 +39,7 @@ class wxMainFrame:
     wxCheckBox* m_checkBoxOutputClean;
     wxCheckBox* m_checkBoxOutputSanitize;
     wxCheckBox* m_checkBoxOutputLinearize;
-    wxStaticText* m_staticTextEstimatedSize;
+    wxHyperlinkCtrl* m_hyperlinkCtrlEstimatedSize;
     wxCheckBox* m_checkBoxMetadataAuthor;
     wxTextCtrl* m_textCtrlMetadataAuthor;
     wxCheckBox* m_checkBoxMetadataTitle;
@@ -86,6 +87,7 @@ class wxMainFrame:
     void OnItemUpdated(wxThreadEvent&);
     void OnDataViewItemActiveted(wxDataViewEvent&);
     void OnUpdateEstimatedOutputSize(wxUpdateUIEvent&);
+    void OnOpenDestination(wxHyperlinkEvent&);
 
     private:
 
