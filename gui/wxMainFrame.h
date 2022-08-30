@@ -116,6 +116,8 @@ class wxMainFrame:
     void ExecuteTaskKill();
 #endif
 
+    bool IsThreadAlive() const;
+
     private:
 
     wxScopedPtr<wxLog> m_pLog;
@@ -129,8 +131,6 @@ class wxMainFrame:
 
     wxTimer m_timerIdleWakeUp;
 
-    wxString m_execButtonCaptionRun;
-    wxString m_execButtonCaptionKill;
     wxString m_logTimestamp;
     bool     m_autoScroll;
 

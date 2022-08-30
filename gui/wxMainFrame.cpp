@@ -808,8 +808,7 @@ wxBoxSizer* wxMainFrame::create_bottom_ctrls()
     sizer->AddStretchSpacer();
 
     {
-        wxButton* const button = new wxButton(this, wxID_ANY, m_execButtonCaptionRun);
-        button->SetWindowVariant(wxWINDOW_VARIANT_LARGE);
+        wxBitmapButton* const button = create_bitmap_button(this, "action-launch", wxWINDOW_VARIANT_LARGE);
         button->SetToolTip(_("Execute (or kill) mutool utility"));
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonRun, this);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnExecMuTool, this);
@@ -823,8 +822,6 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
     : wxFrame(parent, id, title, pos, size, style),
     m_pPrevLog(nullptr),
     m_logTimestamp(wxLog::GetTimestamp()),
-    m_execButtonCaptionRun(_("Run")),
-    m_execButtonCaptionKill(_("Kill")),
     m_autoScroll(true),
     m_commonDir(wxFileNameRefData::Get())
 {
@@ -877,8 +874,7 @@ void wxMainFrame::OnClose(wxCloseEvent& event)
         return;
     }
 
-    wxThread* const thread = GetThread();
-    if (event.CanVeto() && thread != nullptr && thread->IsAlive())
+    if (event.CanVeto() && IsThreadAlive())
     {
         wxLogWarning(_("Vetoing window close request - background worker thread"));
         event.Veto();
@@ -908,8 +904,9 @@ void wxMainFrame::OnClose(wxCloseEvent& event)
 
     if (m_timerIdleWakeUp.IsRunning()) m_timerIdleWakeUp.Stop();
 
-    if (thread != nullptr && thread->IsAlive())
+    if (IsThreadAlive())
     {
+        wxThread* const thread = GetThread();
         thread->Delete();
         thread->Wait();
     }
@@ -1010,11 +1007,9 @@ void wxMainFrame::OnUpdateButtonRun(wxUpdateUIEvent& event)
     #else
         event.Enable(true);
     #endif
-        event.SetText(m_execButtonCaptionKill);
         return;
     }
 
-    event.SetText(m_execButtonCaptionRun);
     if (m_listViewInputFiles->GetItemCount() == 0)
     {
         event.Enable(false);
@@ -1474,13 +1469,10 @@ void wxMainFrame::ExecuteMuTool(const wxArrayString& args, const wxFileName& cwd
 
 void wxMainFrame::OnDropFiles(const wxArrayString& fileNames)
 {
+    if (IsThreadAlive())
     {
-        const wxThread* thread = GetThread();
-        if (thread != nullptr && thread->IsAlive())
-        {
-            wxLogWarning(_("Cannot drop files - background thread is still running"));
-            return;
-        }
+        wxLogWarning(_("Cannot drop files - background thread is still running"));
+        return;
     }
 
     const wxWindowUpdateLocker locker(m_notebook);
@@ -1510,8 +1502,7 @@ void wxMainFrame::post_focus_list() const
 
 void wxMainFrame::OnUpdateButtonAdd(wxUpdateUIEvent& event)
 {
-    const wxThread* thread = GetThread();
-    event.Enable(thread == nullptr || !thread->IsAlive());
+    event.Enable(!IsThreadAlive());
 }
 
 void wxMainFrame::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
@@ -1556,8 +1547,7 @@ void wxMainFrame::OnUpdateButtonDelete(wxUpdateUIEvent& event)
 {
     if (m_listViewInputFiles->GetSelectedItemsCount() > 0)
     {
-        const wxThread* thread = GetThread();
-        event.Enable(thread == nullptr || !thread->IsAlive());
+        event.Enable(!IsThreadAlive());
     }
     else
     {
@@ -1601,8 +1591,7 @@ void wxMainFrame::OnUpdateButtonSelectAll(wxUpdateUIEvent& event)
 {
     if (m_listViewInputFiles->GetItemCount() > 0)
     {
-        const wxThread* thread = GetThread();
-        event.Enable(thread == nullptr || !thread->IsAlive());
+        event.Enable(!IsThreadAlive());
     }
     else
     {
@@ -1669,17 +1658,24 @@ namespace
     }
 }
 
+bool wxMainFrame::IsThreadAlive() const
+{
+    const wxThread* thread = GetThread();
+    if (thread != nullptr && thread->IsAlive())
+    {
+        return true;
+    }
+    return false;
+}
+
 void wxMainFrame::OnUpdateButtonResolutionScale(wxUpdateUIEvent& event)
 {
     if (m_listViewInputFiles->GetSelectedItemsCount() > 0)
     {
+        if (!IsThreadAlive())
         {
-            const wxThread* thread = GetThread();
-            if (thread != nullptr && thread->IsAlive())
-            {
-                event.Enable(false);
-                return;
-            }
+            event.Enable(false);
+            return;
         }
 
         wxDataViewItemArray elems;
@@ -2219,8 +2215,7 @@ void wxMainFrame::OnUpdateButtonDocOpen(wxUpdateUIEvent& event)
 
     if (m_listViewInputFiles->GetSelectedItemsCount() == 1)
     {
-        const wxThread* thread = GetThread();
-        event.Enable(thread == nullptr || !thread->IsAlive());
+        event.Enable(!IsThreadAlive());
     }
     else
     {
@@ -2247,7 +2242,6 @@ void wxMainFrame::OnButtonOpenCommonDir(wxCommandEvent& WXUNUSED(event))
 {
     const wxFileName& commonDir = m_commonDir->GetFileName();
     if (!commonDir.IsOk()) return;
-
     wxLaunchDefaultApplication(commonDir.GetFullPath());
 }
 
@@ -2287,19 +2281,10 @@ void wxMainFrame::OnButtonCopyToDst(wxCommandEvent& WXUNUSED(event))
 
 void wxMainFrame::OnUpdateEstimatedOutputSize(wxUpdateUIEvent& event)
 {
-    if (m_pProcess)
+    if (m_pProcess || IsThreadAlive())
     {
         event.Enable(false);
         return;
-    }
-
-    {
-        const wxThread* thread = GetThread();
-        if (thread != nullptr && thread->IsAlive())
-        {
-            event.Enable(false);
-            return;
-        }
     }
 
     if (m_totalSize == wxULL(0) || m_checkBoxOutputDecompress->GetValue() || m_checkBoxOutputAscii->GetValue())
@@ -2314,20 +2299,10 @@ void wxMainFrame::OnUpdateEstimatedOutputSize(wxUpdateUIEvent& event)
 
 void wxMainFrame::OnOpenDestination(wxHyperlinkEvent& WXUNUSED(event))
 {
-    if (m_pProcess)
+    if (m_pProcess || IsThreadAlive() || !wxGetApp().SumatraPdfFound())
     {
         return;
     }
-
-    {
-        const wxThread* thread = GetThread();
-        if (thread != nullptr && thread->IsAlive())
-        {
-            return;
-        }
-    }
-
-    if (!wxGetApp().SumatraPdfFound()) return;
 
     const wxString fns = m_textCtrlDst->GetValue();
     if (fns.IsEmpty()) return;
