@@ -78,6 +78,7 @@ class wxMainFrame:
     void OnUpdateButtonDocOpen(wxUpdateUIEvent&);
     void OnButtonDocOpen(wxCommandEvent&);
     void OnUpdateButtonCopyToDst(wxUpdateUIEvent&);
+    void OnButtonOpenCommonDir(wxCommandEvent&);
     void OnButtonCopyToDst(wxCommandEvent&);
     void OnButtonClearResolutionScale(wxCommandEvent&);
     void OnChooseDst(wxCommandEvent&);

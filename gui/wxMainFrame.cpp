@@ -26,99 +26,64 @@ namespace
         return get_variant_data<T>(v)->GetValue();
     }
 
-    wxStaticBoxSizer* create_static_box_sizer(wxWindow* parent, const wxString& label, wxOrientation orientation)
+    wxStaticBoxSizer* create_static_box_sizer(wxWindow* const parent, const wxString& label, wxOrientation orientation)
     {
         return new wxStaticBoxSizer(new wxStaticBox(parent, wxID_ANY, label), orientation);
     }
 
-    wxStaticText* create_static_text(wxWindow* parent, const wxString& label)
-    {
-        wxStaticText* const res = new wxStaticText(parent, wxID_ANY, label);
-
-        res->Wrap(-1);
-        return res;
-    }
-
-    wxSizerFlags get_left_ctrl_sizer_flags(wxWindow* wnd)
-    {
-        return wxSizerFlags().CenterVertical().Border(wxRIGHT).Proportion(0);
-    }
-
-    wxSizerFlags get_middle_crtl_sizer_flags(wxWindow* wnd)
-    {
-        return wxSizerFlags().CenterVertical().Border(wxLEFT | wxRIGHT).Proportion(0);
-    }
-
-    wxSizerFlags get_left_exp_crtl_sizer_flags(wxWindow* wnd)
-    {
-        return wxSizerFlags().CenterVertical().Border(wxRIGHT).Proportion(1);
-    }
-
-    wxSizerFlags get_right_crtl_sizer_flags(wxWindow* wnd)
-    {
-        return wxSizerFlags().CenterVertical().Border(wxLEFT).Proportion(0);
-    }
-
-    wxSizerFlags get_vertical_allign_sizer_flags()
-    {
-        return wxSizerFlags().CenterVertical().Proportion(0);
-    }
-
-    wxCheckBox* create_checkbox(wxWindow* parent, const wxString& label, bool val = false)
+    wxCheckBox* create_checkbox(wxWindow* const parent, const wxString& label, bool val = false)
     {
         wxCheckBox* const res = new wxCheckBox(parent, wxID_ANY, label);
-
         res->SetValue(val);
         return res;
     }
 
-    wxCheckBox* create_checkbox(const wxStaticBoxSizer* parentSizer, const wxString& label, bool val = false)
+    wxCheckBox* create_checkbox(const wxStaticBoxSizer* const parentSizer, const wxString& label, bool val = false)
     {
         return create_checkbox(parentSizer->GetStaticBox(), label, val);
     }
 
-    wxCheckBox* create_3state_checkbox(wxWindow* parent, const wxString& label, wxCheckBoxState state = wxCHK_UNDETERMINED)
+    wxCheckBox* create_3state_checkbox(wxWindow* const parent, const wxString& label, wxCheckBoxState state = wxCHK_UNDETERMINED)
     {
         wxCheckBox* const res = new wxCheckBox(parent, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxCHK_3STATE | wxCHK_ALLOW_3RD_STATE_FOR_USER);
-
         res->Set3StateValue(state);
         return res;
     }
 
-    bool is_checked(const wxCheckBox* checkBox)
+    wxCheckBox* create_3state_checkbox(const wxStaticBoxSizer* const parentSizer, const wxString& label, wxCheckBoxState state = wxCHK_UNDETERMINED)
+    {
+        return create_3state_checkbox(parentSizer->GetStaticBox(), label, state);
+    }
+
+    bool is_checked(const wxCheckBox* const checkBox)
     {
         if (checkBox->Is3State()) return (checkBox->Get3StateValue() == wxCHK_CHECKED);
         else return checkBox->GetValue();
     }
 
-    wxCheckBox* create_3state_checkbox(const wxStaticBoxSizer* parentSizer, const wxString& label, wxCheckBoxState state = wxCHK_UNDETERMINED)
-    {
-        return create_3state_checkbox(parentSizer->GetStaticBox(), label, state);
-    }
-
-    wxButton* create_button(const wxStaticBoxSizer* parentSizer, const wxString& label)
-    {
-        return new wxButton(parentSizer->GetStaticBox(), wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-    }
-
-    wxButton* create_button(wxWindow* parent, const wxString& label)
+    wxButton* create_button(wxWindow* const parent, const wxString& label)
     {
         return new wxButton(parent, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     }
 
-    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxButton* create_button(const wxStaticBoxSizer* const parentSizer, const wxString& label)
+    {
+        return create_button(parentSizer->GetStaticBox(), label);
+    }
+
+    wxBitmapButton* create_bitmap_button(wxWindow* const parent, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapButton* const res = new wxBitmapButton(parent, wxID_ANY, bitmapBundle);
         res->SetWindowVariant(windowVariant);
         return res;
     }
 
-    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         return create_bitmap_button(parentSizer->GetStaticBox(), bitmapBundle, windowVariant);
     }
 
-    wxBitmapButton* create_bitmap_button(wxWindow* parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxBitmapButton* create_bitmap_button(wxWindow* const parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapBundle bitmapBundle;
         if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
@@ -131,7 +96,7 @@ namespace
         }
     }
 
-    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* parentSizer, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapBundle bitmapBundle;
         if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
@@ -144,20 +109,19 @@ namespace
         }
     }
 
-
-    wxStaticBitmap* create_static_bitmap(wxWindow* parent, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxStaticBitmap* create_static_bitmap(wxWindow* const parent, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxStaticBitmap* const res = new wxStaticBitmap(parent, wxID_ANY, bitmapBundle);
         res->SetWindowVariant(windowVariant);
         return res;
     }
 
-    wxStaticBitmap* create_static_bitmap(const wxStaticBoxSizer* parentSizer, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxStaticBitmap* create_static_bitmap(const wxStaticBoxSizer* const parentSizer, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         return create_static_bitmap(parentSizer->GetStaticBox(), bitmapBundle, windowVariant);
     }
 
-    wxStaticBitmap* create_static_bitmap(wxWindow* parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxStaticBitmap* create_static_bitmap(wxWindow* const parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapBundle bitmapBundle;
         if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
@@ -170,7 +134,7 @@ namespace
         }
     }
 
-    wxStaticBitmap* create_static_bitmap(const wxStaticBoxSizer* parentSizer, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    wxStaticBitmap* create_static_bitmap(const wxStaticBoxSizer* const parentSizer, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapBundle bitmapBundle;
         if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
@@ -183,46 +147,56 @@ namespace
         }
     }
 
-    wxTextCtrl* create_text_ctrl(wxWindow* parent, const wxString& label = wxEmptyString, unsigned long maxLength = 0)
+    wxTextCtrl* create_text_ctrl(wxWindow* const parent, const wxString& label = wxEmptyString, unsigned long maxLength = 0)
     {
         wxTextCtrl* const res = new wxTextCtrl(parent, wxID_ANY, label);
         if (maxLength > 0) res->SetMaxLength(maxLength);
         return res;
     }
 
-    wxTextCtrl* create_text_ctrl(const wxStaticBoxSizer* parentSizer, const wxString& label = wxEmptyString, unsigned long maxLength = 0)
+    wxTextCtrl* create_text_ctrl(const wxStaticBoxSizer* const parentSizer, const wxString& label = wxEmptyString, unsigned long maxLength = 0)
     {
         return create_text_ctrl(parentSizer->GetStaticBox(), label, maxLength);
     }
 
-    wxStaticText* create_static_text(wxWindow* parent)
+    wxStaticText* create_static_text(wxWindow* const parent, const wxString& label = wxEmptyString)
     {
-        return new wxStaticText(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT | wxST_ELLIPSIZE_MIDDLE| wxST_NO_AUTORESIZE);
+        return new wxStaticText(parent, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT | wxST_ELLIPSIZE_MIDDLE | wxST_NO_AUTORESIZE);
     }
 
-    wxStaticText* create_centered_static_text(wxWindow* parent, const wxString& label = wxEmptyString)
+    wxStaticText* create_static_text(const wxStaticBoxSizer* const parentSizer, const wxString& label = wxEmptyString)
+    {
+        return create_static_text(parentSizer->GetStaticBox(), label);
+    }
+
+    wxStaticText* create_centered_static_text(wxWindow* const parent, const wxString& label = wxEmptyString)
     {
         return new wxStaticText(parent, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER | wxST_ELLIPSIZE_START);
     }
 
-    wxStaticText* create_static_text(const wxStaticBoxSizer* parentSizer)
-    {
-        return create_static_text(parentSizer->GetStaticBox());
-    }
-
-    wxStaticText* create_centered_static_text(const wxStaticBoxSizer* parentSizer, const wxString& label = wxEmptyString)
+    wxStaticText* create_centered_static_text(const wxStaticBoxSizer* const parentSizer, const wxString& label = wxEmptyString)
     {
         return create_centered_static_text(parentSizer->GetStaticBox(), label);
     }
 
-    wxStaticLine* create_horizontal_static_line(wxWindow* parent)
+    wxStaticLine* create_horizontal_static_line(wxWindow* const parent)
     {
         return new wxStaticLine(parent, wxID_ANY, wxDefaultPosition, wxSize(0, parent->FromDIP(1)), wxLI_HORIZONTAL);
     }
 
-    wxSizerFlags get_horizontal_static_line_sizer_flags(wxWindow* wnd)
+    wxStaticLine* create_horizontal_static_line(const wxStaticBoxSizer* const parentSizer)
+    {
+        return create_horizontal_static_line(parentSizer->GetStaticBox());
+    }
+
+    wxSizerFlags get_horizontal_static_line_sizer_flags(const wxWindow* const wnd)
     {
         return wxSizerFlags().Expand().Border(wxTOP | wxBOTTOM, wnd->FromDIP(2));
+    }
+
+    wxSizerFlags get_horizontal_static_line_sizer_flags(const wxStaticBoxSizer* const sizer)
+    {
+        return get_horizontal_static_line_sizer_flags(sizer->GetStaticBox());
     }
 
     wxHyperlinkCtrl* create_hyperlink(wxWindow* const parent, const wxString& label = wxEmptyString, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
@@ -498,8 +472,8 @@ wxSizer* wxMainFrame::create_vertical_button_panel(const wxStaticBoxSizer* const
     }
 
     {
-        wxStaticLine* const staticLine = create_horizontal_static_line(sizer->GetStaticBox());
-        vinnerSizer->Add(staticLine, get_horizontal_static_line_sizer_flags(sizer->GetStaticBox()));
+        wxStaticLine* const staticLine = create_horizontal_static_line(sizer);
+        vinnerSizer->Add(staticLine, get_horizontal_static_line_sizer_flags(sizer));
     }
 
     {
@@ -585,34 +559,36 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
 
                 {
                     wxBoxSizer* const hsizer = new wxBoxSizer(wxHORIZONTAL);
-                    const wxSizerFlags ctrlFlags = wxSizerFlags().CenterVertical().ReserveSpaceEvenIfHidden();
+                    const wxSizerFlags ctrlFlags = wxSizerFlags().CenterVertical();
 
                     {
-                        wxStaticBitmap* const staticBitmap = create_static_bitmap(panel, "file-folder");
-                        staticBitmap->SetToolTip(_("Common directory"));
-                        hsizer->Add(staticBitmap, wxSizerFlags(ctrlFlags).Border(wxRIGHT, panel->FromDIP(4)));
+                        wxBitmapButton* const button = create_bitmap_button(sizer, "file-folder");
+                        button->SetToolTip(_("Open common directory"));
+                        button->Enable(false);
+                        button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonOpenCommonDir, this);
+                        hsizer->Add(button, wxSizerFlags(ctrlFlags).Border(wxRIGHT, sizer->GetStaticBox()->FromDIP(4)));
                     }
 
                     {
-                        wxStaticText* const staticText = create_static_text(panel);
+                        wxStaticText* const staticText = create_static_text(sizer);
                         staticText->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
                         staticText->SetToolTip(_("Common directory"));
+                        staticText->Enable(false);
                         hsizer->Add(staticText, wxSizerFlags(ctrlFlags).Proportion(1));
                         m_staticTextCommonDir = staticText;
                     }
 
                     innerSizer->Add(hsizer, wxSizerFlags(ctrlFlags).Expand().Border(wxTOP));
-                    hsizer->Show(false);
                     m_sizerCommonDir = hsizer;
                 }
 
                 {
                     wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-arrow_downward");
                     button->SetToolTip(_("Copy common directory to destination"));
-                    button->Hide();
+                    button->Enable(false);
                     button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonCopyToDst, this);
                     button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonCopyToDst, this);
-                    innerSizer->Add(button, wxSizerFlags().Center().Border(wxTOP|wxLEFT).ReserveSpaceEvenIfHidden());
+                    innerSizer->Add(button, wxSizerFlags().Center().Border(wxLEFT));
                     m_buttonCommonDir = button;
                 }
 
@@ -1973,6 +1949,21 @@ void wxMainFrame::delete_temporary_files()
     m_temporaryFiles.clear();
 }
 
+namespace
+{
+    void enable_sizer_windows(wxSizer* const sizer, bool enable)
+    {
+        const size_t cnt = sizer->GetItemCount();
+        for (size_t i = 0; i < cnt; ++i)
+        {
+            const wxSizerItem* const si = sizer->GetItem(i);
+            if (!si->IsWindow()) continue;
+            wxWindow* const wnd = si->GetWindow();
+            wnd->Enable(enable);
+        }
+    }
+}
+
 void wxMainFrame::OnItemUpdated(wxThreadEvent& event)
 {
     const wxVector<wxVariant> evPayload = event.GetPayload<wxVector<wxVariant>>();
@@ -1997,16 +1988,14 @@ void wxMainFrame::OnItemUpdated(wxThreadEvent& event)
             if (m_commonDir->GetFileName().IsOk())
             {
                 m_staticTextCommonDir->SetLabel(m_commonDir->GetFileName().GetFullPath().RemoveLast());
-                //m_staticTextCommonDir->Show();
-                m_sizerCommonDir->Show(true);
-                m_buttonCommonDir->Show();
+                enable_sizer_windows(m_sizerCommonDir, true);
+                m_buttonCommonDir->Enable(true);
             }
             else
             {
                 m_staticTextCommonDir->SetLabel(wxEmptyString);
-                //m_staticTextCommonDir->Show(false);
-                m_sizerCommonDir->Show(false);
-                m_buttonCommonDir->Show(false);
+                enable_sizer_windows(m_sizerCommonDir, false);
+                m_buttonCommonDir->Enable(false);
             }
 
             m_totalSize = evPayload[1].GetULongLong();
@@ -2252,6 +2241,14 @@ void wxMainFrame::OnButtonDocOpen(wxCommandEvent& WXUNUSED(event))
     if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) return;
     const wxRelativeFileName& rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
     wxGetApp().RunDocViewer(rfn.GetFileName());
+}
+
+void wxMainFrame::OnButtonOpenCommonDir(wxCommandEvent& WXUNUSED(event))
+{
+    const wxFileName& commonDir = m_commonDir->GetFileName();
+    if (!commonDir.IsOk()) return;
+
+    wxLaunchDefaultApplication(commonDir.GetFullPath());
 }
 
 void wxMainFrame::OnUpdateButtonCopyToDst(wxUpdateUIEvent& event)
