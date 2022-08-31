@@ -46,8 +46,8 @@ IF(INSTALL_MINGW64)
 	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-gcc-dbg-${WXWIDGETS_VERSION}-win64.7z 0feb4d3651955cb28bf75b056a5e7aa96c8727fe "wxWidgets dev libraries [MinGW64]")
 	DownloadPkgSha1(${URL_WXWIDGETS} wxWidgets-gcc-${WXWIDGETS_VERSION}-win64.7z 6e9553fa91076f255da01b925b512b31561cf883 "wxWidgets libraries [MinGW64]")
 	
-	SET(URL_MINGW64 "https://github.com/RoEdAl/ucrt-mingw-builds/releases/download/v12.2.0-rt10-ucrt1")
-	DownloadPkgSha1(${URL_MINGW64} x86_64-12.2.0-release-win32-seh-rt_v10-rev0.7z 7ac51a2536139bf8aa3a14a1a90f125492907589 "MinGW64 runtime")
+	SET(URL_MINGW64 "https://github.com/RoEdAl/ucrt-mingw-builds/releases/download/v12.2.0-rt10-ucrt2")
+	DownloadPkgSha1(${URL_MINGW64} x86_64-12.2.0-release-win32-seh-rt_v10-rev0.7z 5de70c97911ba10a591cbf6290e75f336ab0f635 "MinGW64 runtime")
 		
 	SET(URL_GCC "http://gcc.gnu.org/onlinedocs/gcc-12.2.0")
 	DownloadPkgSha1(${URL_GCC} gcc.pdf becbd022de78a4f818d53d3229a19f9edb03f88e "GCC documentation - PDF")
