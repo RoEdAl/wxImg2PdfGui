@@ -19,9 +19,14 @@ namespace
 
     wxBitmapToggleButton* create_toggle_button(wxWindow* const parent)
     {
-        wxBitmapBundle bitmapBundle;
-        wxGetApp().LoadMaterialDesignIcon("content-link", wxWINDOW_VARIANT_SMALL, bitmapBundle);
-        wxBitmapToggleButton* const button = new wxBitmapToggleButton(parent, wxID_ANY, bitmapBundle, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+        wxBitmapBundle bbNormal;
+        wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon("content-link_off", wxWINDOW_VARIANT_SMALL, bbNormal), nullptr, "Fail to load <ink_off> icon");
+
+        wxBitmapBundle bbPressed;
+        wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon("content-link", wxWINDOW_VARIANT_SMALL, bbPressed), nullptr, "Fail to load <link> icon");
+
+        wxBitmapToggleButton* const button = new wxBitmapToggleButton(parent, wxID_ANY, bbNormal, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+        button->SetBitmapPressed(bbPressed);
         button->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
         return button;
     }

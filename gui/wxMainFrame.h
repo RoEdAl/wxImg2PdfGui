@@ -53,6 +53,7 @@ class wxMainFrame:
     wxCheckBox* m_checkBoxMetadataModDate;
     DateTimePicker* m_dateTimePickerMetadataModDate;
     ListBox* m_listBoxMessages;
+    wxBitmapButton* m_buttonRun;
 
     protected:
 
@@ -119,6 +120,9 @@ class wxMainFrame:
     bool IsThreadAlive() const;
 
     private:
+
+    wxBitmapBundle m_bbLaunch;
+    wxBitmapBundle m_bbKill;
 
     wxScopedPtr<wxLog> m_pLog;
     wxLog* m_pPrevLog;

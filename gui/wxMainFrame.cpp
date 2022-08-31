@@ -808,10 +808,11 @@ wxBoxSizer* wxMainFrame::create_bottom_ctrls()
     sizer->AddStretchSpacer();
 
     {
-        wxBitmapButton* const button = create_bitmap_button(this, "action-launch", wxWINDOW_VARIANT_LARGE);
+        wxBitmapButton* const button = create_bitmap_button(this, m_bbLaunch, wxWINDOW_VARIANT_LARGE);
         button->SetToolTip(_("Execute (or kill) mutool utility"));
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonRun, this);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnExecMuTool, this);
+        m_buttonRun = button;
         sizer->Add(button, wxSizerFlags().CentreVertical());
     }
 
@@ -827,6 +828,9 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 {
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_FRAMEBK));
     SetIcons(wxGetApp().GetAppIcon());
+
+    wxGetApp().LoadMaterialDesignIcon("action-launch", wxWINDOW_VARIANT_LARGE, m_bbLaunch);
+    wxGetApp().LoadMaterialDesignIcon("image-flash_on", wxWINDOW_VARIANT_LARGE, m_bbKill);
 
     {
         wxBoxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
@@ -958,6 +962,8 @@ void wxMainFrame::OnProcessTerminated(wxProcessEvent& event)
     wxLogInfo(_("exe[f]: pid: %d, exit code: %d [%08x]"), event.GetPid(), event.GetExitCode(), event.GetExitCode());
     m_pProcess.reset();
     Unbind(wxEVT_IDLE, &wxMainFrame::OnIdle, this);
+
+    m_buttonRun->SetBitmapLabel(m_bbLaunch);
 
     delete_temporary_files();
 
@@ -1125,6 +1131,7 @@ void wxMainFrame::ExecuteCmd(const wxFileName& exe, const wxString& params, cons
     Bind(wxEVT_IDLE, &wxMainFrame::OnIdle, this);
 
     m_timerIdleWakeUp.Start(TIMER_IDLE_WAKE_UP_INTERVAL);
+    m_buttonRun->SetBitmapLabel(m_bbKill);
 }
 
 #ifdef __WXMSW__
@@ -1670,48 +1677,41 @@ bool wxMainFrame::IsThreadAlive() const
 
 void wxMainFrame::OnUpdateButtonResolutionScale(wxUpdateUIEvent& event)
 {
-    if (m_listViewInputFiles->GetSelectedItemsCount() > 0)
-    {
-        if (!IsThreadAlive())
-        {
-            event.Enable(false);
-            return;
-        }
-
-        wxDataViewItemArray elems;
-        m_listViewInputFiles->GetSelections(elems);
-
-        size_t cntImg = 0, cntPdf = 0, cntDoc = 0;
-        wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
-
-        for (const auto& i : elems)
-        {
-            wxVariant v;
-            dataModel->GetValue(v, i, 1);
-            if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) continue;
-            const wxRelativeFileName& rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
-            const wxFileName& fn = rfn.GetFileName();
-            const wxString ext = fn.GetExt().MakeLower();
-            if (ext.CmpNoCase("pdf") == 0)
-            {
-                cntPdf += 1;
-            }
-            else if (ext.CmpNoCase("svg") == 0)
-            {
-                cntDoc += 1;
-            }
-            else
-            {
-                cntImg += 1;
-            }
-        }
-
-        event.Enable(exclusive_cnt(cntImg, cntPdf, cntDoc) && (cntPdf == 0));
-    }
-    else
+    if ((m_listViewInputFiles->GetSelectedItemsCount() == 0) || IsThreadAlive())
     {
         event.Enable(false);
+        return;
     }
+
+    wxDataViewItemArray elems;
+    m_listViewInputFiles->GetSelections(elems);
+
+    size_t cntImg = 0, cntPdf = 0, cntDoc = 0;
+    wxDataViewModel* const dataModel = m_listViewInputFiles->GetModel();
+
+    for (const auto& i : elems)
+    {
+        wxVariant v;
+        dataModel->GetValue(v, i, 1);
+        if (v.GetType().CmpNoCase(wxS("wxRelativeFileName")) != 0) continue;
+        const wxRelativeFileName& rfn = get_variant_custom_val<wxVariantDataRelativeFileName>(v);
+        const wxFileName& fn = rfn.GetFileName();
+        const wxString ext = fn.GetExt().MakeLower();
+        if (ext.CmpNoCase("pdf") == 0)
+        {
+            cntPdf += 1;
+        }
+        else if (ext.CmpNoCase("svg") == 0)
+        {
+            cntDoc += 1;
+        }
+        else
+        {
+            cntImg += 1;
+        }
+    }
+
+    event.Enable(exclusive_cnt(cntImg, cntPdf, cntDoc) && (cntPdf == 0));
 }
 
 void wxMainFrame::OnDataViewItemActiveted(wxDataViewEvent& event)
@@ -2247,12 +2247,6 @@ void wxMainFrame::OnButtonOpenCommonDir(wxCommandEvent& WXUNUSED(event))
 
 void wxMainFrame::OnUpdateButtonCopyToDst(wxUpdateUIEvent& event)
 {
-    if (m_pProcess)
-    {
-        event.Enable(false);
-        return;
-    }
-
     event.Enable(m_commonDir->GetFileName().IsOk());
 }
 

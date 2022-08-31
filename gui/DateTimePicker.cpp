@@ -12,9 +12,18 @@ DateTimePicker::DateTimePicker(wxWindow* parent, wxWindowID id, const wxDateTime
 
     const wxSizerFlags ctrlFlags = wxSizerFlags().CentreVertical();
 
-    wxBitmapBundle bitmapBundle;
-    wxGetApp().LoadMaterialDesignIcon("action-today", wxWINDOW_VARIANT_NORMAL, bitmapBundle);
-    wxBitmapToggleButton* toggleButton = new wxBitmapToggleButton(this, wxID_ANY, bitmapBundle, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    wxBitmapBundle bbNormal;
+    wxGetApp().LoadMaterialDesignIcon("action-edit_calendar", wxWINDOW_VARIANT_NORMAL, bbNormal);
+
+    wxBitmapBundle bbPressed;
+    wxGetApp().LoadMaterialDesignIcon("action-today", wxWINDOW_VARIANT_NORMAL, bbPressed);
+
+    wxBitmapBundle bbDisabled;
+    wxGetApp().LoadDisabledMaterialDesignIcon("action-today", wxWINDOW_VARIANT_NORMAL, bbDisabled);
+
+    wxBitmapToggleButton* toggleButton = new wxBitmapToggleButton(this, wxID_ANY, bbNormal, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    toggleButton->SetBitmapPressed(bbPressed);
+    toggleButton->SetBitmapDisabled(bbDisabled);
     toggleButton->SetWindowVariant(wxWINDOW_VARIANT_NORMAL);
     toggleButton->SetValue(true);
     toggleButton->Bind(wxEVT_TOGGLEBUTTON, &DateTimePicker::OnToggleButtonCurrent, this);
