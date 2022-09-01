@@ -5,6 +5,17 @@
 #include "DateTimePicker.h"
 #include "wxApp.h"
 
+namespace
+{
+    bool load_bitmaps(wxBitmapBundle& bbNormal, wxBitmapBundle& bbPressed, wxBitmapBundle& bbDisabled)
+    {
+        wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon("action-edit_calendar", wxWINDOW_VARIANT_NORMAL, bbNormal), false, "DateTimePicker: Fail to load action-edit_calendar bitmap");
+        wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon("action-today", wxWINDOW_VARIANT_NORMAL, bbPressed), false, "DateTimePicker: Fail to load action-today bitmap");
+        wxCHECK_MSG(wxGetApp().LoadDisabledMaterialDesignIcon("action-today", wxWINDOW_VARIANT_NORMAL, bbDisabled), false, "DateTimePicker: Fail to load action-today bitmap");
+        return true;
+    }
+}
+
 DateTimePicker::DateTimePicker(wxWindow* parent, wxWindowID id, const wxDateTime& value)
     :wxControl(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE| wxCLIP_CHILDREN)
 {
@@ -12,14 +23,8 @@ DateTimePicker::DateTimePicker(wxWindow* parent, wxWindowID id, const wxDateTime
 
     const wxSizerFlags ctrlFlags = wxSizerFlags().CentreVertical();
 
-    wxBitmapBundle bbNormal;
-    wxGetApp().LoadMaterialDesignIcon("action-edit_calendar", wxWINDOW_VARIANT_NORMAL, bbNormal);
-
-    wxBitmapBundle bbPressed;
-    wxGetApp().LoadMaterialDesignIcon("action-today", wxWINDOW_VARIANT_NORMAL, bbPressed);
-
-    wxBitmapBundle bbDisabled;
-    wxGetApp().LoadDisabledMaterialDesignIcon("action-today", wxWINDOW_VARIANT_NORMAL, bbDisabled);
+    wxBitmapBundle bbNormal, bbPressed, bbDisabled;
+    wxCHECK_RET(load_bitmaps(bbNormal, bbPressed, bbDisabled), "DateTimePicker: fail to load bitmaps");
 
     wxBitmapToggleButton* toggleButton = new wxBitmapToggleButton(this, wxID_ANY, bbNormal, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     toggleButton->SetBitmapPressed(bbPressed);

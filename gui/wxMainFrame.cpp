@@ -10,9 +10,10 @@
 
 namespace
 {
-    const int AUTO_SCROLL_UPDATE_INTERVAL = 2000;
-    const int TIMER_IDLE_WAKE_UP_INTERVAL = 250;
-    const wxChar DEFAULT_OUTPUT_FILE_NAME[] = wxS("album.pdf");
+    constexpr int AUTO_SCROLL_UPDATE_INTERVAL = 2000;
+    constexpr int TIMER_IDLE_WAKE_UP_INTERVAL = 250;
+    constexpr wxChar DEFAULT_OUTPUT_FILE_NAME[] = wxS("album.pdf");
+    constexpr wxWindowVariant LAUNCH_BUTTON_VARIANT = wxWINDOW_VARIANT_LARGE;
 
     template<typename T>
     const T* get_variant_data(const wxVariant& v)
@@ -26,31 +27,42 @@ namespace
         return get_variant_data<T>(v)->GetValue();
     }
 
-    wxStaticBoxSizer* create_static_box_sizer(wxWindow* const parent, const wxString& label, wxOrientation orientation)
+    wxStaticBoxSizer* create_static_box_sizer(wxWindow* const parent, const wxString& label, const wxOrientation orientation)
     {
         return new wxStaticBoxSizer(new wxStaticBox(parent, wxID_ANY, label), orientation);
     }
 
-    wxCheckBox* create_checkbox(wxWindow* const parent, const wxString& label, bool val = false)
+    wxCheckBox* create_checkbox(wxWindow* const parent, const wxString& label, const bool val = false)
     {
         wxCheckBox* const res = new wxCheckBox(parent, wxID_ANY, label);
         res->SetValue(val);
         return res;
     }
 
-    wxCheckBox* create_checkbox(const wxStaticBoxSizer* const parentSizer, const wxString& label, bool val = false)
+    wxCheckBox* create_checkbox(const wxStaticBoxSizer* const parentSizer, const wxString& label, const bool val = false)
     {
         return create_checkbox(parentSizer->GetStaticBox(), label, val);
     }
 
-    wxCheckBox* create_3state_checkbox(wxWindow* const parent, const wxString& label, wxCheckBoxState state = wxCHK_UNDETERMINED)
+    wxCheckBox* create_mini_checkbox(const wxStaticBoxSizer* const sizer,
+                                 const wxString& label,
+                                 const wxString& toolTip,
+                                 const bool value = false)
+    {
+        wxCheckBox* const checkBox = create_checkbox(sizer, label, value);
+        checkBox->SetWindowVariant(wxWINDOW_VARIANT_MINI);
+        checkBox->SetToolTip(toolTip);
+        return checkBox;
+    }
+
+    wxCheckBox* create_3state_checkbox(wxWindow* const parent, const wxString& label, const wxCheckBoxState state = wxCHK_UNDETERMINED)
     {
         wxCheckBox* const res = new wxCheckBox(parent, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, wxCHK_3STATE | wxCHK_ALLOW_3RD_STATE_FOR_USER);
         res->Set3StateValue(state);
         return res;
     }
 
-    wxCheckBox* create_3state_checkbox(const wxStaticBoxSizer* const parentSizer, const wxString& label, wxCheckBoxState state = wxCHK_UNDETERMINED)
+    wxCheckBox* create_3state_checkbox(const wxStaticBoxSizer* const parentSizer, const wxString& label, const wxCheckBoxState state = wxCHK_UNDETERMINED)
     {
         return create_3state_checkbox(parentSizer->GetStaticBox(), label, state);
     }
@@ -78,35 +90,51 @@ namespace
         return res;
     }
 
+    template<typename P>
+    void create_bitmap_button(wxWindow* const parent, const wxBitmapBundle& bitmapBundle, P initializer, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        wxBitmapButton* const button = create_bitmap_button(parent, bitmapBundle, windowVariant);
+        initializer(button);
+    }
+
     wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         return create_bitmap_button(parentSizer->GetStaticBox(), bitmapBundle, windowVariant);
     }
 
+    template<typename P>
+    void create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxBitmapBundle& bitmapBundle, P initializer, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        wxBitmapButton* const button = create_bitmap_button(parentSizer, bitmapBundle, windowVariant);
+        initializer(button);
+    }
+
     wxBitmapButton* create_bitmap_button(wxWindow* const parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapBundle bitmapBundle;
-        if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
+        wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle), nullptr, wxString::Format("Fail to load bitmap: id=%s", resName));
+        return create_bitmap_button(parent, bitmapBundle, windowVariant);
+    }
+
+    template<typename P>
+    void create_bitmap_button(wxWindow* const parent, const wxString& resName, P initializer, const wxWindowVariant widnowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        wxBitmapButton* const button = create_bitmap_button(parent, resName, widnowVariant);
+        if (button != nullptr)
         {
-            return create_bitmap_button(parent, bitmapBundle, windowVariant);
-        }
-        else
-        {
-            return nullptr;
+            initializer(button);
         }
     }
 
     wxBitmapButton* create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
-        wxBitmapBundle bitmapBundle;
-        if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
-        {
-            return create_bitmap_button(parentSizer, bitmapBundle, windowVariant);
-        }
-        else
-        {
-            return nullptr;
-        }
+        return create_bitmap_button(parentSizer->GetStaticBox(), resName, windowVariant);
+    }
+
+    template<typename P>
+    void create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxString& resName, P initializer, const wxWindowVariant widnowVariant = wxWINDOW_VARIANT_SMALL)
+    {
+        create_bitmap_button(parentSizer->GetStaticBox(), resName, initializer, widnowVariant);
     }
 
     wxStaticBitmap* create_static_bitmap(wxWindow* const parent, const wxBitmapBundle& bitmapBundle, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
@@ -124,30 +152,16 @@ namespace
     wxStaticBitmap* create_static_bitmap(wxWindow* const parent, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapBundle bitmapBundle;
-        if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
-        {
-            return create_static_bitmap(parent, bitmapBundle, windowVariant);
-        }
-        else
-        {
-            return nullptr;
-        }
+        wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle), nullptr, wxString::Format("Fail to load bitmap: id=%s", resName));
+        return create_static_bitmap(parent, bitmapBundle, windowVariant);
     }
 
     wxStaticBitmap* create_static_bitmap(const wxStaticBoxSizer* const parentSizer, const wxString& resName, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
-        wxBitmapBundle bitmapBundle;
-        if (wxGetApp().LoadMaterialDesignIcon(resName, windowVariant, bitmapBundle))
-        {
-            return create_static_bitmap(parentSizer, bitmapBundle, windowVariant);
-        }
-        else
-        {
-            return nullptr;
-        }
+        return create_static_bitmap(parentSizer->GetStaticBox(), resName, windowVariant);
     }
 
-    wxTextCtrl* create_text_ctrl(wxWindow* const parent, const wxString& label = wxEmptyString, unsigned long maxLength = 0)
+    wxTextCtrl* create_text_ctrl(wxWindow* const parent, const wxString& label = wxEmptyString, const unsigned long maxLength = 0)
     {
         wxTextCtrl* const res = new wxTextCtrl(parent, wxID_ANY, label);
         if (maxLength > 0) res->SetMaxLength(maxLength);
@@ -184,9 +198,29 @@ namespace
         return new wxStaticLine(parent, wxID_ANY, wxDefaultPosition, wxSize(0, parent->FromDIP(1)), wxLI_HORIZONTAL);
     }
 
+    template<typename P>
+    void create_horizontal_static_line(wxWindow* const parent, P initializer)
+    {
+        wxStaticLine* const staticLine = create_horizontal_static_line(parent);
+        if (staticLine != nullptr)
+        {
+            initializer(staticLine);
+        }
+    }
+
     wxStaticLine* create_horizontal_static_line(const wxStaticBoxSizer* const parentSizer)
     {
         return create_horizontal_static_line(parentSizer->GetStaticBox());
+    }
+
+    template<typename P>
+    void create_horizontal_static_line(const wxStaticBoxSizer* const parentSizer, P initializer)
+    {
+        wxStaticLine* const staticLine = create_horizontal_static_line(parentSizer->GetStaticBox());
+        if (staticLine != nullptr)
+        {
+            initializer(staticLine);
+        }
     }
 
     wxSizerFlags get_horizontal_static_line_sizer_flags(const wxWindow* const wnd)
@@ -367,78 +401,48 @@ namespace
 
 namespace
 {
+    template<typename P>
+    void create_bmp_data_view_column(const wxString& variantType, const wxString& title, unsigned int modelColumn, P initializer)
+    {
+        wxDataViewBitmapRenderer* const renderer = new wxDataViewBitmapRenderer(variantType);
+        wxDataViewColumn* const column = new wxDataViewColumn(title, renderer, modelColumn, wxCOL_WIDTH_AUTOSIZE);
+        column->SetSortable(false);
+        column->SetReorderable(false);
+        column->SetResizeable(false);
+        initializer(column);
+    }
+
+    template<typename P>
+    void create_txt_data_view_column(const wxString& variantType, const wxString& title, unsigned int modelColumn, P initializer, const wxAlignment aligment = wxALIGN_CENTER)
+    {
+        wxDataViewTextRenderer* const renderer = new wxDataViewTextRenderer(variantType);
+        wxDataViewColumn* const column = new wxDataViewColumn(title, renderer, modelColumn, wxCOL_WIDTH_AUTOSIZE, aligment);
+        column->SetSortable(false);
+        column->SetReorderable(false);
+        column->SetResizeable(false);
+        initializer(column);
+    }
+
     wxDataViewListCtrl* create_data_view_list(const wxStaticBoxSizer* const sizer)
     {
         wxDataViewListCtrl* const dataViewList = new wxDataViewListCtrl(sizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_VERT_RULES | wxDV_MULTIPLE | wxDV_ROW_LINES | wxBORDER_THEME);
-
-        {
-            wxDataViewBitmapRenderer* const renderer = new wxDataViewBitmapRenderer(wxS("wxBitmapBundle"));
-            wxDataViewColumn* const column = new wxDataViewColumn(wxS("#"), renderer, 0, wxCOL_WIDTH_AUTOSIZE);
-            column->SetSortable(false);
-            column->SetReorderable(false);
-            column->SetResizeable(false);
+        auto& columnAppender = [dataViewList](auto* const column) {
             dataViewList->AppendColumn(column);
-        }
+        };
 
-        {
-            wxDataViewTextRenderer* const renderer = new wxDataViewTextRenderer(wxS("wxRelativeFileName"));
-            wxDataViewColumn* const column = new wxDataViewColumn(_("File"), renderer, 1, wxCOL_WIDTH_AUTOSIZE, wxALIGN_LEFT);
-            column->SetSortable(false);
-            column->SetReorderable(false);
-            column->SetResizeable(false);
-            dataViewList->AppendColumn(column);
-        }
+        create_bmp_data_view_column(wxS("wxBitmapBundle"), wxS("#"), 0, columnAppender);
+        create_txt_data_view_column(wxS("wxRelativeFileName"), _("File"), 1, columnAppender, wxALIGN_LEFT);
 
-        {
+        create_txt_data_view_column(wxS("wxSize"), _("Dimensions"), 2, [dataViewList, &columnAppender](auto* const column) {
             const wxSize minSize = calc_text_size(dataViewList, 15);
-            wxDataViewTextRenderer* const renderer = new wxDataViewTextRenderer(wxS("wxSize"));
-            wxDataViewColumn* const column = new wxDataViewColumn(_("Dimensions"), renderer, 2, wxCOL_WIDTH_AUTOSIZE);
-            column->SetSortable(false);
-            column->SetReorderable(false);
-            column->SetResizeable(false);
             column->SetMinWidth(minSize.GetWidth());
-            dataViewList->AppendColumn(column);
-        }
+            columnAppender(column);
+        });
 
-        {
-            wxDataViewTextRenderer* const renderer = new wxDataViewTextRenderer(wxS("wxResolutionOrScale"));
-            wxDataViewColumn* const column = new wxDataViewColumn(_("Resolution/Scale"), renderer, 3, wxCOL_WIDTH_AUTOSIZE);
-            column->SetSortable(false);
-            column->SetReorderable(false);
-            column->SetResizeable(false);
-            dataViewList->AppendColumn(column);
-        }
-
-        {
-            wxDataViewTextRenderer* const renderer = new wxDataViewTextRenderer(wxS("string"));
-            wxDataViewColumn* const column = new wxDataViewColumn(_("Size"), renderer, 4, wxCOL_WIDTH_AUTOSIZE);
-            column->SetSortable(false);
-            column->SetReorderable(false);
-            column->SetResizeable(false);
-            dataViewList->AppendColumn(column);
-        }
-
-        {
-            wxDataViewTextRenderer* const renderer = new wxDataViewTextRenderer(wxS("null"));
-            wxDataViewColumn* const column = new wxDataViewColumn(wxEmptyString, renderer, 5, wxCOL_WIDTH_AUTOSIZE);
-            column->SetSortable(false);
-            column->SetReorderable(false);
-            column->SetResizeable(false);
-            dataViewList->AppendColumn(column);
-        }
-
+        create_txt_data_view_column(wxS("wxResolutionOrScale"), _("Resolution/Scale"), 3, columnAppender);
+        create_txt_data_view_column(wxS("string"), _("Size"), 4, columnAppender);
+        create_txt_data_view_column(wxS("null"), wxEmptyString, 5, columnAppender);
         return dataViewList;
-    }
-
-    wxCheckBox* create_mini_checkbox(const wxStaticBoxSizer* const sizer,
-                                     const wxString& label,
-                                     const wxString& toolTip,
-                                     bool value = false)
-    {
-        wxCheckBox* const checkBox = create_checkbox(sizer, label, value);
-        checkBox->SetWindowVariant(wxWINDOW_VARIANT_MINI);
-        checkBox->SetToolTip(toolTip);
-        return checkBox;
     }
 }
 
@@ -448,61 +452,52 @@ wxSizer* wxMainFrame::create_vertical_button_panel(const wxStaticBoxSizer* const
     wxMainFrame* const frame = wxConstCast(this, wxMainFrame);
     const wxSizerFlags buttonFlags = wxSizerFlags().CentreHorizontal();
 
-    {
-        wxBitmapButton* const button = create_bitmap_button(sizer, "content-add");
+    create_bitmap_button(sizer, "content-add", [frame, vinnerSizer, &buttonFlags](auto* const button) {
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonAdd, frame);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonAdd, frame);
         vinnerSizer->Add(button, buttonFlags);
-    }
+    });
 
-    {
-        wxBitmapButton* const button = create_bitmap_button(sizer, "content-remove");
+    create_bitmap_button(sizer, "content-remove", [frame, vinnerSizer, &buttonFlags](auto* const button) {
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDelete, frame);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDelete, frame);
         vinnerSizer->Add(button, buttonFlags);
-    }
+    });
 
-    {
-        wxBitmapBundle bitmapBundle;
-        wxBitmapButton* const button = create_bitmap_button(sizer, "content-select_all");
+    create_bitmap_button(sizer, "content-select_all", [frame, vinnerSizer, &buttonFlags](auto* const button) {
         button->SetToolTip(_("Select all"));
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonSelectAll, frame);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonSelectAll, frame);
         vinnerSizer->Add(button, buttonFlags);
-    }
+    });
 
-    {
-        wxStaticLine* const staticLine = create_horizontal_static_line(sizer);
+    create_horizontal_static_line(sizer, [vinnerSizer, sizer](auto* const staticLine) {
         vinnerSizer->Add(staticLine, get_horizontal_static_line_sizer_flags(sizer));
-    }
+    });
 
-    {
-        wxBitmapButton* const button = create_bitmap_button(sizer, "action-aspect_ratio");
+    create_bitmap_button(sizer, "action-aspect_ratio", [frame, vinnerSizer, &buttonFlags](auto* const button) {
         button->SetToolTip(_("Change resolution/Scale"));
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, frame);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonResolutionScale, frame);
         vinnerSizer->Add(button, buttonFlags);
-    }
+    });
 
-    {
-        wxBitmapButton* const button = create_bitmap_button(sizer, "content-clear");
+    create_bitmap_button(sizer, "content-clear", [frame, vinnerSizer, &buttonFlags](auto* const button) {
         button->SetToolTip(_("Use original image resolution/Do not scale image"));
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonResolutionScale, frame);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonClearResolutionScale, frame);
         vinnerSizer->Add(button, buttonFlags);
-    }
+    });
 
     if (wxGetApp().SumatraPdfFound())
     {
         vinnerSizer->AddStretchSpacer();
-
-        {
-            wxBitmapButton* const button = create_bitmap_button(sizer, "action-preview");
+        create_bitmap_button(sizer, "action-preview", [frame, vinnerSizer, &buttonFlags](auto* const button) {
             button->SetToolTip(_("Launch document viewer"));
             button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonDocOpen, frame);
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonDocOpen, frame);
             vinnerSizer->Add(button, wxSizerFlags(buttonFlags).DoubleBorder(wxTOP));
-        }
+        });
     }
 
     return vinnerSizer;
@@ -542,8 +537,8 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
                 }
 
                 {
-                   wxSizer* const vinnerSizer = create_vertical_button_panel(sizer);
-                   wxSizerFlags panelFlags = wxSizerFlags().Border(wxLEFT);
+                    wxSizer* const vinnerSizer = create_vertical_button_panel(sizer);
+                    wxSizerFlags panelFlags = wxSizerFlags().Border(wxLEFT);
 
                     if (wxGetApp().SumatraPdfFound())
                     {
@@ -561,13 +556,12 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
                     wxBoxSizer* const hsizer = new wxBoxSizer(wxHORIZONTAL);
                     const wxSizerFlags ctrlFlags = wxSizerFlags().CenterVertical();
 
-                    {
-                        wxBitmapButton* const button = create_bitmap_button(sizer, "file-folder");
+                    create_bitmap_button(sizer, "file-folder", [this, hsizer, &ctrlFlags, sizer](auto* const button) {
                         button->SetToolTip(_("Open common directory"));
                         button->Enable(false);
                         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonOpenCommonDir, this);
                         hsizer->Add(button, wxSizerFlags(ctrlFlags).Border(wxRIGHT, sizer->GetStaticBox()->FromDIP(4)));
-                    }
+                    });
 
                     {
                         wxStaticText* const staticText = create_static_text(sizer);
@@ -582,15 +576,14 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
                     m_sizerCommonDir = hsizer;
                 }
 
-                {
-                    wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-arrow_downward");
+                create_bitmap_button(sizer, "navigation-arrow_downward", [this, innerSizer](auto* const button) {
                     button->SetToolTip(_("Copy common directory to destination"));
                     button->Enable(false);
                     button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonCopyToDst, this);
                     button->Bind(wxEVT_BUTTON, &wxMainFrame::OnButtonCopyToDst, this);
                     innerSizer->Add(button, wxSizerFlags().Center().Border(wxLEFT));
                     m_buttonCommonDir = button;
-                }
+                });
 
                 sizer->Add(innerSizer, wxSizerFlags().Expand().Proportion(1));
             }
@@ -613,11 +606,10 @@ wxPanel* wxMainFrame::create_src_dst_pannel(wxNotebook* notebook)
                 m_textCtrlDst = textCtrl;
             }
 
-            {
-                wxBitmapButton* const button = create_bitmap_button(sizer, "navigation-more_horiz", wxWINDOW_VARIANT_NORMAL);
+            create_bitmap_button(sizer, "navigation-more_horiz", [this, innerSizer](auto* const button) {
                 button->Bind(wxEVT_BUTTON, &wxMainFrame::OnChooseDst, this);
                 innerSizer->Add(button, wxSizerFlags().CenterVertical().Border(wxLEFT));
-            }
+            }, wxWINDOW_VARIANT_NORMAL);
 
             sizer->Add(innerSizer, wxSizerFlags().Expand());
         }
@@ -775,13 +767,12 @@ wxPanel* wxMainFrame::create_messages_panel(wxNotebook* notebook)
 
         sizer->AddStretchSpacer();
 
-        {
-            wxBitmapButton* const button = create_bitmap_button(panel, "content-content_copy");
+        create_bitmap_button(panel, "content-content_copy", [this, sizer](auto* const button) {
             button->SetToolTip(_("Copy all messages to clipboard"));
             button->Bind(wxEVT_BUTTON, &wxMainFrame::OnCopyEvents, this);
             button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateMsgCtrls, this);
             sizer->Add(button, wxSizerFlags().CenterVertical());
-        }
+        });
 
         panelSizer->Add(sizer, wxSizerFlags().Expand().Border());
     }
@@ -807,16 +798,25 @@ wxBoxSizer* wxMainFrame::create_bottom_ctrls()
 
     sizer->AddStretchSpacer();
 
-    {
-        wxBitmapButton* const button = create_bitmap_button(this, m_bbLaunch, wxWINDOW_VARIANT_LARGE);
+    create_bitmap_button(this, m_bbLaunch, [this, sizer](auto* const button) {
         button->SetToolTip(_("Execute (or kill) mutool utility"));
         button->Bind(wxEVT_UPDATE_UI, &wxMainFrame::OnUpdateButtonRun, this);
         button->Bind(wxEVT_BUTTON, &wxMainFrame::OnExecMuTool, this);
         m_buttonRun = button;
         sizer->Add(button, wxSizerFlags().CentreVertical());
-    }
+    }, LAUNCH_BUTTON_VARIANT);
 
     return sizer;
+}
+
+namespace
+{
+    bool load_bitmaps(wxBitmapBundle& bbLaunch, wxBitmapBundle& bbKill)
+    {
+        wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon("action-launch", LAUNCH_BUTTON_VARIANT, bbLaunch), false, "Fail to laod action-launch bitmap");
+        wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon("image-flash_on", LAUNCH_BUTTON_VARIANT, bbKill), false, "Fail to load image-flash_on bitmap");
+        return true;
+    }
 }
 
 wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
@@ -828,9 +828,7 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 {
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_FRAMEBK));
     SetIcons(wxGetApp().GetAppIcon());
-
-    wxGetApp().LoadMaterialDesignIcon("action-launch", wxWINDOW_VARIANT_LARGE, m_bbLaunch);
-    wxGetApp().LoadMaterialDesignIcon("image-flash_on", wxWINDOW_VARIANT_LARGE, m_bbKill);
+    wxCHECK_RET(load_bitmaps(m_bbLaunch, m_bbKill), "MainFrame: fail to load launch bitmap");
 
     {
         wxBoxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
@@ -844,23 +842,7 @@ wxMainFrame::wxMainFrame(wxWindow* parent, wxWindowID id, const wxString& title,
     wxLog::DisableTimestamp();
     wxLog::EnableLogging();
 
-    {
-        const wxVersionInfo libVer = wxGetLibraryVersionInfo();
-        const wxJson jsonInfo = wxJson::meta();
-        wxLogMessage(_wxS("Simple image to PDF converter"));
-        wxLogMessage(_wxS("Powered by M\u03bcPDF library"));
-        wxLogMessage(wxEmptyString);
-        wxLogMessage("%-10s: %s", _("Version"), wxGetApp().APP_VERSION);
-        wxLogMessage("%-10s: %s", _("Author"), wxGetApp().GetVendorDisplayName());
-        wxLogMessage("%-10s: %s", _("OS"), wxPlatformInfo::Get().GetOperatingSystemDescription());
-        wxLogMessage("%-10s: %s %s", _("Compiler"), INFO_CXX_COMPILER_ID, INFO_CXX_COMPILER_VERSION);
-        wxLogMessage("%-10s: %s %s", _("GUI"), libVer.GetVersionString(), libVer.GetCopyright());
-        wxLogMessage("%-10s: %s %s %s", wxS("JSON"),
-                     wxString(jsonInfo["name"].get<std::string>()),
-                     wxString(jsonInfo["version"]["string"].get<std::string>()),
-                     wxString(jsonInfo["copyright"].get<std::string>()));
-        wxLogMessage("%-10s: %s", _("Source"), wxS("http://github.com/RoEdAl/wxImg2PdfGui"));
-    }
+    wxGetApp().ShowInfo();
     wxGetApp().ShowToolPaths();
 
     Bind(wxEVT_CLOSE_WINDOW, &wxMainFrame::OnClose, this);

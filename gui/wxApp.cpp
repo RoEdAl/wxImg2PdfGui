@@ -438,11 +438,10 @@ bool wxMyApp::LoadDisabledMaterialDesignIcon(const wxString& resName, const wxWi
     return load_pngs(m_materialDesignIconsPath, resName, bitmapBundle, bitmapScale, true);
 }
 
-void wxMyApp::fill_icon_map()
+bool wxMyApp::fill_icon_map()
 {
     wxBitmapBundle bmpImg;
-    const bool imgLoaded = LoadMaterialDesignIcon("image-image", wxWINDOW_VARIANT_NORMAL, bmpImg);
-    wxASSERT(imgLoaded);
+    wxCHECK_MSG(LoadMaterialDesignIcon("image-image", wxWINDOW_VARIANT_NORMAL, bmpImg), false, "Fail to load image-image bitmap");
 
     wxIconBundle icoImg;
     bmp_to_ico_bundle(bmpImg, icoImg);
@@ -490,6 +489,8 @@ void wxMyApp::fill_icon_map()
     {
         m_bitmapMap[i.first] = wxBitmapBundle::FromIconBundle(i.second);
     }
+
+    return true;
 }
 
 bool wxMyApp::GetFnColumn(const wxRelativeFileName& rfn, wxVector<wxVariant>& column) const
@@ -621,7 +622,10 @@ bool wxMyApp::OnInit()
 
     if (m_materialDesignIconsPath.IsFileReadable())
     {
-        fill_icon_map();
+        if (!fill_icon_map())
+        {
+            return false;
+        }
     }
     else
     {
@@ -667,7 +671,7 @@ const wxFileName& wxMyApp::GetMuToolPath() const
 
 bool wxMyApp::SumatraPdfFound() const
 {
-    return m_sumatraPdfPath.IsOk();
+    return m_sumatraPdfPath.IsOk() && m_sumatraPdfPath.IsAbsolute();
 }
 
 const wxFileName& wxMyApp::GetSumatraPdfPath() const
@@ -722,6 +726,25 @@ namespace
             wxLogMessage(_("%-10s: <not found>"), tool.GetName());
         }
     }
+
+    void show_info()
+    {
+        const wxVersionInfo libVer = wxGetLibraryVersionInfo();
+        const wxJson jsonInfo = wxJson::meta();
+        wxLogMessage(_wxS("Simple image to PDF converter"));
+        wxLogMessage(_wxS("Powered by M\u03bcPDF toolkit"));
+        wxLogMessage(wxEmptyString);
+        wxLogMessage("%-10s: %s", _("Version"), wxGetApp().APP_VERSION);
+        wxLogMessage("%-10s: %s", _("Author"), wxGetApp().GetVendorDisplayName());
+        wxLogMessage("%-10s: %s", _("OS"), wxPlatformInfo::Get().GetOperatingSystemDescription());
+        wxLogMessage("%-10s: %s %s", _("Compiler"), INFO_CXX_COMPILER_ID, INFO_CXX_COMPILER_VERSION);
+        wxLogMessage("%-10s: %s %s", _("GUI"), libVer.GetVersionString(), libVer.GetCopyright());
+        wxLogMessage("%-10s: %s %s %s", wxS("JSON"),
+                     wxString(jsonInfo["name"].get<std::string>()),
+                     wxString(jsonInfo["version"]["string"].get<std::string>()),
+                     wxString(jsonInfo["copyright"].get<std::string>()));
+        wxLogMessage("%-10s: %s", _("Source"), wxS("http://github.com/RoEdAl/wxImg2PdfGui"));
+    }
 }
 
 void wxMyApp::ShowToolPaths() const
@@ -729,4 +752,9 @@ void wxMyApp::ShowToolPaths() const
     show_tool_path(m_muToolPath);
     show_tool_path(m_sumatraPdfPath);
     show_tool_path(m_scriptPath);
+}
+
+void wxMyApp::ShowInfo() const
+{
+    show_info();
 }

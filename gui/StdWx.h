@@ -67,6 +67,7 @@
 #include <utility>
 #include <vector>
 #include <unordered_map>
+#include <functional>
 
 extern "C" {
 #define IS_INTRESOURCE(_r) ((((ULONG_PTR)(_r)) >> 16)==0)

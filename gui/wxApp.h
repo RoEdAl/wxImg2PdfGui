@@ -39,6 +39,7 @@ class wxMyApp:
     const wxFileName& GetSumatraPdfPath() const;
     bool RunDocViewer(const wxFileName&) const;
 
+    void ShowInfo() const;
     void ShowToolPaths() const;
     bool ShowLogTimestamps(bool showTimestamps = true);
     bool GetFnColumn(const wxRelativeFileName&, wxVector<wxVariant>&) const;
@@ -47,7 +48,7 @@ class wxMyApp:
 
     protected:
 
-    void fill_icon_map();
+    bool fill_icon_map();
 
     protected:
 

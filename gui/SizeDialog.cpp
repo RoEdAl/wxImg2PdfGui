@@ -19,10 +19,8 @@ namespace
 
     wxBitmapToggleButton* create_toggle_button(wxWindow* const parent)
     {
-        wxBitmapBundle bbNormal;
+        wxBitmapBundle bbNormal, bbPressed;
         wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon("content-link_off", wxWINDOW_VARIANT_SMALL, bbNormal), nullptr, "Fail to load <ink_off> icon");
-
-        wxBitmapBundle bbPressed;
         wxCHECK_MSG(wxGetApp().LoadMaterialDesignIcon("content-link", wxWINDOW_VARIANT_SMALL, bbPressed), nullptr, "Fail to load <link> icon");
 
         wxBitmapToggleButton* const button = new wxBitmapToggleButton(parent, wxID_ANY, bbNormal, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
@@ -60,6 +58,7 @@ SizeDialog::SizeDialog(
 
         {
             wxBitmapToggleButton* const button = create_toggle_button(this);
+            wxCHECK_RET(button != nullptr, "SizeDialog: Fail to load bitmaps");
 
             const wxGenericValidator validator(&m_singleValue);
             button->SetValidator(validator);
