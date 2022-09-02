@@ -59,37 +59,37 @@ class wxMainFrame:
 
     void OnClose(wxCloseEvent&);
     void OnIdle(wxIdleEvent&);
-    void OnIdleWakeupTimer(wxTimerEvent&);
+    void OnIdleWakeupTimer(wxTimerEvent&) const;
     void OnProcessTerminated(wxProcessEvent&);
 #ifdef __WXMSW__
     void OnTaskKillProcessTerminated(wxProcessEvent&);
 #endif
-    void OnUpdateRunUiCtrl(wxUpdateUIEvent&);
-    void OnCheckVerbose(wxCommandEvent&);
-    void OnUpdateButtonRun(wxUpdateUIEvent&);
+    void OnUpdateRunUiCtrl(wxUpdateUIEvent&) const;
+    void OnCheckVerbose(wxCommandEvent&) const;
+    void OnUpdateButtonRun(wxUpdateUIEvent&) const;
     void OnExecMuTool(wxCommandEvent&);
-    void OnUpdateButtonAdd(wxUpdateUIEvent&);
+    void OnUpdateButtonAdd(wxUpdateUIEvent&) const;
     void OnButtonAdd(wxCommandEvent&);
-    void OnUpdateButtonDelete(wxUpdateUIEvent&);
+    void OnUpdateButtonDelete(wxUpdateUIEvent&) const;
     void OnButtonDelete(wxCommandEvent&);
-    void OnUpdateButtonSelectAll(wxUpdateUIEvent&);
-    void OnButtonSelectAll(wxCommandEvent&);
-    void OnUpdateButtonResolutionScale(wxUpdateUIEvent&);
+    void OnUpdateButtonSelectAll(wxUpdateUIEvent&) const;
+    void OnButtonSelectAll(wxCommandEvent&) const;
+    void OnUpdateButtonResolutionScale(wxUpdateUIEvent&) const;
     void OnButtonResolutionScale(wxCommandEvent&);
-    void OnUpdateButtonDocOpen(wxUpdateUIEvent&);
-    void OnButtonDocOpen(wxCommandEvent&);
-    void OnUpdateButtonCopyToDst(wxUpdateUIEvent&);
-    void OnButtonOpenCommonDir(wxCommandEvent&);
-    void OnButtonCopyToDst(wxCommandEvent&);
+    void OnUpdateButtonDocOpen(wxUpdateUIEvent&) const;
+    void OnButtonDocOpen(wxCommandEvent&) const;
+    void OnUpdateButtonCopyToDst(wxUpdateUIEvent&) const;
+    void OnButtonOpenCommonDir(wxCommandEvent&) const;
+    void OnButtonCopyToDst(wxCommandEvent&) const;
     void OnButtonClearResolutionScale(wxCommandEvent&);
     void OnChooseDst(wxCommandEvent&);
-    void OnCheckShowTimestamps(wxCommandEvent&);
-    void OnUpdateMsgCtrls(wxUpdateUIEvent&);
-    void OnCopyEvents(wxCommandEvent&);
+    void OnCheckShowTimestamps(wxCommandEvent&) const;
+    void OnUpdateMsgCtrls(wxUpdateUIEvent&) const;
+    void OnCopyEvents(wxCommandEvent&) const;
     void OnItemUpdated(wxThreadEvent&);
     void OnDataViewItemActiveted(wxDataViewEvent&);
-    void OnUpdateEstimatedOutputSize(wxUpdateUIEvent&);
-    void OnOpenDestination(wxHyperlinkEvent&);
+    void OnUpdateEstimatedOutputSize(wxUpdateUIEvent&) const;
+    void OnOpenDestination(wxHyperlinkEvent&) const;
 
     private:
 

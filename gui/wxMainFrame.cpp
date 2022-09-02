@@ -87,11 +87,12 @@ namespace
     {
         wxBitmapButton* const res = new wxBitmapButton(parent, wxID_ANY, bitmapBundle);
         res->SetWindowVariant(windowVariant);
+        res->SetCanFocus(false);
         return res;
     }
 
     template<typename P>
-    void create_bitmap_button(wxWindow* const parent, const wxBitmapBundle& bitmapBundle, P initializer, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    void create_bitmap_button(wxWindow* const parent, const wxBitmapBundle& bitmapBundle, const P& initializer, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapButton* const button = create_bitmap_button(parent, bitmapBundle, windowVariant);
         initializer(button);
@@ -103,7 +104,7 @@ namespace
     }
 
     template<typename P>
-    void create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxBitmapBundle& bitmapBundle, P initializer, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
+    void create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxBitmapBundle& bitmapBundle, const P& initializer, const wxWindowVariant windowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapButton* const button = create_bitmap_button(parentSizer, bitmapBundle, windowVariant);
         initializer(button);
@@ -117,7 +118,7 @@ namespace
     }
 
     template<typename P>
-    void create_bitmap_button(wxWindow* const parent, const wxString& resName, P initializer, const wxWindowVariant widnowVariant = wxWINDOW_VARIANT_SMALL)
+    void create_bitmap_button(wxWindow* const parent, const wxString& resName, const P& initializer, const wxWindowVariant widnowVariant = wxWINDOW_VARIANT_SMALL)
     {
         wxBitmapButton* const button = create_bitmap_button(parent, resName, widnowVariant);
         if (button != nullptr)
@@ -132,7 +133,7 @@ namespace
     }
 
     template<typename P>
-    void create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxString& resName, P initializer, const wxWindowVariant widnowVariant = wxWINDOW_VARIANT_SMALL)
+    void create_bitmap_button(const wxStaticBoxSizer* const parentSizer, const wxString& resName, const P& initializer, const wxWindowVariant widnowVariant = wxWINDOW_VARIANT_SMALL)
     {
         create_bitmap_button(parentSizer->GetStaticBox(), resName, initializer, widnowVariant);
     }
@@ -199,7 +200,7 @@ namespace
     }
 
     template<typename P>
-    void create_horizontal_static_line(wxWindow* const parent, P initializer)
+    void create_horizontal_static_line(wxWindow* const parent, const P& initializer)
     {
         wxStaticLine* const staticLine = create_horizontal_static_line(parent);
         if (staticLine != nullptr)
@@ -214,7 +215,7 @@ namespace
     }
 
     template<typename P>
-    void create_horizontal_static_line(const wxStaticBoxSizer* const parentSizer, P initializer)
+    void create_horizontal_static_line(const wxStaticBoxSizer* const parentSizer, const P& initializer)
     {
         wxStaticLine* const staticLine = create_horizontal_static_line(parentSizer->GetStaticBox());
         if (staticLine != nullptr)
@@ -402,7 +403,7 @@ namespace
 namespace
 {
     template<typename P>
-    void create_bmp_data_view_column(const wxString& variantType, const wxString& title, unsigned int modelColumn, P initializer)
+    void create_bmp_data_view_column(const wxString& variantType, const wxString& title, unsigned int modelColumn, const P& initializer)
     {
         wxDataViewBitmapRenderer* const renderer = new wxDataViewBitmapRenderer(variantType);
         wxDataViewColumn* const column = new wxDataViewColumn(title, renderer, modelColumn, wxCOL_WIDTH_AUTOSIZE);
@@ -413,7 +414,7 @@ namespace
     }
 
     template<typename P>
-    void create_txt_data_view_column(const wxString& variantType, const wxString& title, unsigned int modelColumn, P initializer, const wxAlignment aligment = wxALIGN_CENTER)
+    void create_txt_data_view_column(const wxString& variantType, const wxString& title, unsigned int modelColumn, const P& initializer, const wxAlignment aligment = wxALIGN_CENTER)
     {
         wxDataViewTextRenderer* const renderer = new wxDataViewTextRenderer(variantType);
         wxDataViewColumn* const column = new wxDataViewColumn(title, renderer, modelColumn, wxCOL_WIDTH_AUTOSIZE, aligment);
@@ -426,7 +427,7 @@ namespace
     wxDataViewListCtrl* create_data_view_list(const wxStaticBoxSizer* const sizer)
     {
         wxDataViewListCtrl* const dataViewList = new wxDataViewListCtrl(sizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_VERT_RULES | wxDV_MULTIPLE | wxDV_ROW_LINES | wxBORDER_THEME);
-        auto& columnAppender = [dataViewList](auto* const column) {
+        const auto& columnAppender = [dataViewList](auto* const column) {
             dataViewList->AppendColumn(column);
         };
 
@@ -964,7 +965,7 @@ void wxMainFrame::OnProcessTerminated(wxProcessEvent& event)
     }
 }
 
-void wxMainFrame::OnIdleWakeupTimer(wxTimerEvent& WXUNUSED(event))
+void wxMainFrame::OnIdleWakeupTimer(wxTimerEvent& WXUNUSED(event)) const
 {
     if (!m_pProcess) return;
 
@@ -981,12 +982,12 @@ void wxMainFrame::OnIdle(wxIdleEvent& event)
     event.RequestMore(pProcess->HaveOutOrErr());
 }
 
-void wxMainFrame::OnCheckVerbose(wxCommandEvent& event)
+void wxMainFrame::OnCheckVerbose(wxCommandEvent& event) const
 {
     wxLog::SetVerbose(event.IsChecked());
 }
 
-void wxMainFrame::OnUpdateButtonRun(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateButtonRun(wxUpdateUIEvent& event) const
 {
     if (m_pProcess)
     {
@@ -1489,7 +1490,7 @@ void wxMainFrame::post_focus_list() const
     wxQueueEvent(GetEventHandler(), threadEvent.release());
 }
 
-void wxMainFrame::OnUpdateButtonAdd(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateButtonAdd(wxUpdateUIEvent& event) const
 {
     event.Enable(!IsThreadAlive());
 }
@@ -1532,7 +1533,7 @@ void wxMainFrame::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
     post_focus_list();
 }
 
-void wxMainFrame::OnUpdateButtonDelete(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateButtonDelete(wxUpdateUIEvent& event) const
 {
     if (m_listViewInputFiles->GetSelectedItemsCount() > 0)
     {
@@ -1576,7 +1577,7 @@ void wxMainFrame::OnButtonDelete(wxCommandEvent& WXUNUSED(event))
     post_focus_list();
 }
 
-void wxMainFrame::OnUpdateButtonSelectAll(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateButtonSelectAll(wxUpdateUIEvent& event) const
 {
     if (m_listViewInputFiles->GetItemCount() > 0)
     {
@@ -1588,7 +1589,7 @@ void wxMainFrame::OnUpdateButtonSelectAll(wxUpdateUIEvent& event)
     }
 }
 
-void wxMainFrame::OnButtonSelectAll(wxCommandEvent& WXUNUSED(event))
+void wxMainFrame::OnButtonSelectAll(wxCommandEvent& WXUNUSED(event)) const
 {
     m_listViewInputFiles->SelectAll();
     post_focus_list();
@@ -1657,7 +1658,7 @@ bool wxMainFrame::IsThreadAlive() const
     return false;
 }
 
-void wxMainFrame::OnUpdateButtonResolutionScale(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateButtonResolutionScale(wxUpdateUIEvent& event) const
 {
     if ((m_listViewInputFiles->GetSelectedItemsCount() == 0) || IsThreadAlive())
     {
@@ -1870,7 +1871,7 @@ void wxMainFrame::OnChooseDst(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void wxMainFrame::OnCheckShowTimestamps(wxCommandEvent& event)
+void wxMainFrame::OnCheckShowTimestamps(wxCommandEvent& event) const
 {
     if (event.IsChecked())
     {
@@ -1882,17 +1883,17 @@ void wxMainFrame::OnCheckShowTimestamps(wxCommandEvent& event)
     }
 }
 
-void wxMainFrame::OnUpdateRunUiCtrl(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateRunUiCtrl(wxUpdateUIEvent& event) const
 {
     event.Enable(!m_pProcess);
 }
 
-void wxMainFrame::OnUpdateMsgCtrls(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateMsgCtrls(wxUpdateUIEvent& event) const
 {
     event.Enable(!m_pProcess && (m_listBoxMessages->GetCount() > 0));
 }
 
-void wxMainFrame::OnCopyEvents(wxCommandEvent& WXUNUSED(event))
+void wxMainFrame::OnCopyEvents(wxCommandEvent& WXUNUSED(event)) const
 {
     const wxString txt = m_listBoxMessages->GetItemsAsText();
     if (txt.IsEmpty()) return;
@@ -2187,7 +2188,7 @@ wxThread::ExitCode wxMainFrame::Entry()
     return (wxThread::ExitCode)0;
 }
 
-void wxMainFrame::OnUpdateButtonDocOpen(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateButtonDocOpen(wxUpdateUIEvent& event) const
 {
     if (!wxGetApp().SumatraPdfFound())
     {
@@ -2205,7 +2206,7 @@ void wxMainFrame::OnUpdateButtonDocOpen(wxUpdateUIEvent& event)
     }
 }
 
-void wxMainFrame::OnButtonDocOpen(wxCommandEvent& WXUNUSED(event))
+void wxMainFrame::OnButtonDocOpen(wxCommandEvent& WXUNUSED(event)) const
 {
     const wxFileName& sumatraPdf = wxGetApp().GetSumatraPdfPath();
     if (!sumatraPdf.IsOk()) return;
@@ -2220,19 +2221,19 @@ void wxMainFrame::OnButtonDocOpen(wxCommandEvent& WXUNUSED(event))
     wxGetApp().RunDocViewer(rfn.GetFileName());
 }
 
-void wxMainFrame::OnButtonOpenCommonDir(wxCommandEvent& WXUNUSED(event))
+void wxMainFrame::OnButtonOpenCommonDir(wxCommandEvent& WXUNUSED(event)) const
 {
     const wxFileName& commonDir = m_commonDir->GetFileName();
     if (!commonDir.IsOk()) return;
     wxLaunchDefaultApplication(commonDir.GetFullPath());
 }
 
-void wxMainFrame::OnUpdateButtonCopyToDst(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateButtonCopyToDst(wxUpdateUIEvent& event) const
 {
     event.Enable(m_commonDir->GetFileName().IsOk());
 }
 
-void wxMainFrame::OnButtonCopyToDst(wxCommandEvent& WXUNUSED(event))
+void wxMainFrame::OnButtonCopyToDst(wxCommandEvent& WXUNUSED(event)) const
 {
     const wxFileName& commonDir = m_commonDir->GetFileName();
     if (!commonDir.IsOk()) return;
@@ -2255,7 +2256,7 @@ void wxMainFrame::OnButtonCopyToDst(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void wxMainFrame::OnUpdateEstimatedOutputSize(wxUpdateUIEvent& event)
+void wxMainFrame::OnUpdateEstimatedOutputSize(wxUpdateUIEvent& event) const
 {
     if (m_pProcess || IsThreadAlive())
     {
@@ -2273,7 +2274,7 @@ void wxMainFrame::OnUpdateEstimatedOutputSize(wxUpdateUIEvent& event)
     }
 }
 
-void wxMainFrame::OnOpenDestination(wxHyperlinkEvent& WXUNUSED(event))
+void wxMainFrame::OnOpenDestination(wxHyperlinkEvent& WXUNUSED(event)) const
 {
     if (m_pProcess || IsThreadAlive() || !wxGetApp().SumatraPdfFound())
     {

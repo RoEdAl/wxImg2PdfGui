@@ -26,6 +26,7 @@ namespace
         wxBitmapToggleButton* const button = new wxBitmapToggleButton(parent, wxID_ANY, bbNormal, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
         button->SetBitmapPressed(bbPressed);
         button->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+        button->SetCanFocus(false);
         return button;
     }
 
@@ -119,11 +120,12 @@ SizeDialog::SizeDialog(
 void SizeDialog::OnInitDialog(wxInitDialogEvent& event)
 {
     wxDialog::OnInitDialog(event);
+    m_comboBoxWidth->SetFocus();
     m_staticTextSeparator->Show(!m_singleValue);
     m_comboBoxHeight->Show(!m_singleValue);
 }
 
-void SizeDialog::OnToggleSingleValue(wxCommandEvent& event)
+void SizeDialog::OnToggleSingleValue(wxCommandEvent& event) const
 {
     const bool show = !event.IsChecked();
     m_staticTextSeparator->Show(show);
@@ -181,6 +183,7 @@ ScaleDialog::ScaleDialog(
             wxSpinCtrl* const spinCtrl = new wxSpinCtrl(this, wxID_ANY);
             spinCtrl->SetRange(0, 5000);
             spinCtrl->SetValidator(validator);
+            spinCtrl->SetFocus();
             innerSizer->Add(spinCtrl, ctrlFlags);
             m_spinCtrlWidth = spinCtrl;
         }
@@ -228,6 +231,7 @@ ScaleDialog::ScaleDialog(
 void ScaleDialog::OnInitDialog(wxInitDialogEvent& event)
 {
     wxDialog::OnInitDialog(event);
+    m_spinCtrlWidth->SetFocus();
     m_staticTextSeparator->Show(!m_singleValue);
     m_spinCtrlHeight->Show(!m_singleValue);
 }

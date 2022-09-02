@@ -33,6 +33,7 @@ DateTimePicker::DateTimePicker(wxWindow* parent, wxWindowID id, const wxDateTime
     toggleButton->SetValue(true);
     toggleButton->Bind(wxEVT_TOGGLEBUTTON, &DateTimePicker::OnToggleButtonCurrent, this);
     toggleButton->SetToolTip(_("Current date and time"));
+    toggleButton->SetCanFocus(false);
     sizer->Add(toggleButton, wxSizerFlags(ctrlFlags).Border(wxRIGHT));
     m_toggleButton = toggleButton;
 
@@ -89,12 +90,12 @@ wxDateTime DateTimePicker::GetValue() const
     }
 }
 
-void DateTimePicker::OnToggleButtonCurrent(wxCommandEvent& event)
+void DateTimePicker::OnToggleButtonCurrent(wxCommandEvent& event) const
 {
    show_pickers(!event.IsChecked());
 }
 
-void DateTimePicker::show_pickers(bool show)
+void DateTimePicker::show_pickers(bool show) const
 {
     m_datePicker->Show(show);
     m_timePicker->Show(show);

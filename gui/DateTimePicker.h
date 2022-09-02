@@ -16,11 +16,11 @@ class DateTimePicker:public wxControl
 
     protected:
 
-    void OnToggleButtonCurrent(wxCommandEvent&);
+    void OnToggleButtonCurrent(wxCommandEvent&) const;
 
     protected:
 
-    void show_pickers(bool);
+    void show_pickers(bool) const;
 
     protected:
 

@@ -21,7 +21,7 @@ class SizeDialog :public wxDialog
 	protected:
 
 	void OnInitDialog(wxInitDialogEvent&);
-	void OnToggleSingleValue(wxCommandEvent&);
+	void OnToggleSingleValue(wxCommandEvent&) const;
 
 	protected:
 
